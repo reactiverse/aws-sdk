@@ -13,7 +13,10 @@ import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeDefinition;
 import software.amazon.awssdk.services.dynamodb.model.CreateTableResponse;
+import software.amazon.awssdk.services.dynamodb.model.KeyType;
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
 
 import java.net.URI;
 import java.util.Properties;
@@ -64,9 +67,21 @@ public class VertxDynamoClientSpec {
                 .credentialsProvider(credentialsProvider)
                 .endpointOverride(new URI("http://localhost:8000"))
                 .build();
-        CompletableFuture<CreateTableResponse> createTestTable = dynamo.createTable(builder -> {
-            builder.tableName("TEST_TABLE");
-        });
+        CompletableFuture<CreateTableResponse> createTestTable = dynamo.createTable(builder ->
+                builder.tableName("TEST_TABLE")
+                        .provisionedThroughput(ps -> {
+                            ps.writeCapacityUnits(40000L);
+                            ps.readCapacityUnits(40000L);
+                        })
+                    .attributeDefinitions(ad -> {
+                        ad.attributeName("id");
+                        ad.attributeType(ScalarAttributeType.S);
+                    }).keySchema(ks -> {
+                       ks.keyType(KeyType.HASH)
+                       .attributeName("id");
+                    }
+                )
+        );
         CreateTableResponse response = createTestTable.get();
     }
 

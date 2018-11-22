@@ -33,7 +33,7 @@ public class VertxToSdkResponsePublisher implements Publisher<ByteBuffer> {
             s.onComplete();
             future.complete(null);
         });
-        response.bodyHandler(buff ->
+        response.handler(buff ->
                 s.onNext(ByteBuffer.wrap(buff.getBytes()))
         );
         response.exceptionHandler(s::onError);
