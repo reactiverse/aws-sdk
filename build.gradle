@@ -1,0 +1,38 @@
+plugins {
+    id 'java'
+}
+
+group 'io.vertx'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://s3-us-west-2.amazonaws.com/dynamodb-local/release'
+    }
+
+}
+
+dependencies {
+    compile 'io.vertx:vertx-core:3.6.0.CR1'
+    compile 'software.amazon.awssdk:aws-sdk-java:2.1.0'
+
+    testCompile 'junit:junit:4.12'
+    testCompile group: 'com.amazonaws', name: 'DynamoDBLocal', version: '1.+'
+}
+
+/* native (DynamoDB, sqlite stuff) libs should be in classpath */
+task copyNativeDeps(type: Copy) {
+    from(configurations.compile + configurations.testCompile) {
+        include '*.dll'
+        include '*.dylib'
+        include '*.so'
+    }
+    into 'build/libs'
+}
+test {
+    dependsOn copyNativeDeps
+    systemProperty "java.library.path", 'build/libs'
+}
