@@ -12,6 +12,7 @@ import software.amazon.awssdk.http.SdkHttpResponse;
 import software.amazon.awssdk.http.async.AsyncExecuteRequest;
 import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.http.async.SdkAsyncHttpResponseHandler;
+import software.amazon.awssdk.http.async.SdkHttpContentPublisher;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -29,6 +30,9 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
     public CompletableFuture<Void> execute(AsyncExecuteRequest asyncExecuteRequest) {
 
         final SdkHttpRequest request = asyncExecuteRequest.request();
+
+
+
         final HttpClient client = vertx.createHttpClient(getClientOptions(request));
         final String fullPath = request.protocol() + "://" + request.host() + ":" + request.port() + "/" + request.encodedPath();
         HttpClientRequest vRequest = client.request(awsToVertx(request.method()), fullPath);
@@ -51,7 +55,12 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
             responseHandler.onHeaders(builder.build());
             responseHandler.onStream(new VertxToSdkResponsePublisher(vResponse, fut));
         });
-        asyncExecuteRequest.requestContentPublisher().subscribe(new SdkToVertxRequestSubscriber(vRequest));
+        SdkHttpContentPublisher publisher = asyncExecuteRequest.requestContentPublisher();
+        if (publisher != null) {
+            publisher.subscribe(new SdkToVertxRequestSubscriber(vRequest));
+        } else {
+            vRequest.end();
+        }
         return fut;
     }
 
