@@ -27,9 +27,12 @@ public class SdkToVertxRequestSubscriber implements Subscriber<ByteBuffer> {
 
     @Override
     public void onNext(ByteBuffer byteBuffer) {
+        /*
+        Fools AWS signing algorithm
         if (!request.isChunked()) {
             request.setChunked(true);
         }
+        */
         request.write(Buffer.buffer(Unpooled.wrappedBuffer(byteBuffer)));
         subscribtion.request(BUFF_SIZE);
     }
