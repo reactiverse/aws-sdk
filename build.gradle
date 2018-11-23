@@ -37,6 +37,9 @@ task copyNativeDeps(type: Copy) {
 test {
     dependsOn copyNativeDeps
     systemProperty "java.library.path", 'build/libs'
+    testLogging {
+        exceptionFormat = 'full'
+    }
 }
 
 jacocoTestReport {
