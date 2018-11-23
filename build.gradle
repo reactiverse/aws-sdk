@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'jacoco'
+    id 'maven'
 }
 
 group 'io.vertx'
@@ -22,7 +23,7 @@ dependencies {
     compile 'software.amazon.awssdk:aws-sdk-java:2.1.0'
 
     testCompile 'junit:junit:4.12'
-    testCompile group: 'com.amazonaws', name: 'DynamoDBLocal', version: '1.+'
+    testCompile 'com.amazonaws:DynamoDBLocal:1.+'
 }
 
 /* native (DynamoDB, sqlite stuff) libs should be in classpath */
