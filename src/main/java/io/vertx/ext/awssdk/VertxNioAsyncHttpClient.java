@@ -1,5 +1,7 @@
 package io.vertx.ext.awssdk;
 
+import io.netty.handler.codec.http2.Http2SecurityUtil;
+import io.netty.handler.ssl.SupportedCipherSuiteFilter;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
@@ -35,14 +37,16 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
 
         final HttpClient client = vertx.createHttpClient(getClientOptions(request));
         final String fullPath = request.protocol() + "://" + request.host() + ":" + request.port() + request.encodedPath();
-        HttpClientRequest vRequest = client.request(awsToVertx(request.method()), fullPath);
+        HttpClientRequest vRequest = client.request(awsToVertx(request.method()), fullPath).setFollowRedirects(true);
         request.headers().forEach((headerName, headerValues) -> {
             vRequest.putHeader(headerName, String.join(",", headerValues));
         });
         final SdkAsyncHttpResponseHandler responseHandler = asyncExecuteRequest.responseHandler();
         final CompletableFuture<Void> fut = new CompletableFuture<>();
         vRequest.exceptionHandler(e -> {
-            responseHandler.onError(e);
+            // responseHandler.onError(e);
+            // FIXME: if an error happens and we call "onError" it blocks the thread
+            // if we don't, AWS SDK is retrying anyway, but without blocking
             fut.completeExceptionally(e);
         });
         vRequest.handler(vResponse -> {
@@ -65,11 +69,14 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
     }
 
     private HttpClientOptions getClientOptions(SdkHttpRequest request) {
-        return new HttpClientOptions()
+        HttpClientOptions opts = new HttpClientOptions()
                 .setDefaultHost(request.host())
                 .setDefaultPort(request.port());
+        if ("https".equals(request.protocol())) {
+            opts.setSsl(true);
+        }
+        return opts;
     }
-
 
     @Override
     public void close() {
