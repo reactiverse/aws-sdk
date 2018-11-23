@@ -34,7 +34,7 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
 
 
         final HttpClient client = vertx.createHttpClient(getClientOptions(request));
-        final String fullPath = request.protocol() + "://" + request.host() + ":" + request.port() + "/" + request.encodedPath();
+        final String fullPath = request.protocol() + "://" + request.host() + ":" + request.port() + request.encodedPath();
         HttpClientRequest vRequest = client.request(awsToVertx(request.method()), fullPath);
         request.headers().forEach((headerName, headerValues) -> {
             vRequest.putHeader(headerName, String.join(",", headerValues));
