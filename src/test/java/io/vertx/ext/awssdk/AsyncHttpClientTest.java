@@ -6,6 +6,7 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +27,11 @@ public class AsyncHttpClientTest {
   private HttpServer server;
   private SdkAsyncHttpClient client;
 
+  private static final int PORT = 9009;
+  private static final String HOST = "localhost";
+  private static final String SCHEME = "http";
+
+
   @Before
   public void setUp() {
     vertx = Vertx.vertx();
@@ -33,8 +39,16 @@ public class AsyncHttpClientTest {
     client = new VertxNioAsyncHttpClient(vertx);
   }
 
+  @After
+  public void tearDown(TestContext ctx) {
+      if (server == null) {
+          return;
+      }
+      server.close(ctx.asyncAssertSuccess());
+  }
+
   private void startServer(TestContext ctx) {
-    server.listen(9009, "localhost", ctx.asyncAssertSuccess());
+    server.listen(PORT, HOST, ctx.asyncAssertSuccess());
   }
 
   @Test
@@ -48,9 +62,9 @@ public class AsyncHttpClientTest {
     client.execute(AsyncExecuteRequest.builder()
         .request(SdkHttpRequest
             .builder()
-            .protocol("http")
+            .protocol(SCHEME)
             .host("localhost")
-            .port(8080)
+            .port(PORT)
             .method(SdkHttpMethod.GET)
             .build())
         .responseHandler(new SdkAsyncHttpResponseHandler() {
@@ -84,9 +98,9 @@ public class AsyncHttpClientTest {
     startServer(ctx);
     SdkHttpFullRequest request = SdkHttpFullRequest
         .builder()
-        .protocol("http")
-        .host("localhost")
-        .port(8080)
+        .protocol(SCHEME)
+        .host(HOST)
+        .port(PORT)
         .method(SdkHttpMethod.PUT)
         .contentStreamProvider(() -> new ByteArrayInputStream("the-body".getBytes()))
         .build();
