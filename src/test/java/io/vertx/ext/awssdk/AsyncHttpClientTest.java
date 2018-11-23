@@ -63,7 +63,7 @@ public class AsyncHttpClientTest {
         .request(SdkHttpRequest
             .builder()
             .protocol(SCHEME)
-            .host("localhost")
+            .host(HOST)
             .port(PORT)
             .method(SdkHttpMethod.GET)
             .build())
