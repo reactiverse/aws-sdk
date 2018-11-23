@@ -34,7 +34,7 @@ public class AsyncHttpClientTest {
   }
 
   private void startServer(TestContext ctx) {
-    server.listen(8080, "localhost", ctx.asyncAssertSuccess());
+    server.listen(9009, "localhost", ctx.asyncAssertSuccess());
   }
 
   @Test
