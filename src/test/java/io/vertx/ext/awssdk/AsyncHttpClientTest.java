@@ -81,7 +81,7 @@ public class AsyncHttpClientTest {
           }
           @Override
           public void onError(Throwable error) {
-            ctx.fail();
+            ctx.fail(error);
           }
         })
         .build());
@@ -121,7 +121,7 @@ public class AsyncHttpClientTest {
           }
           @Override
           public void onError(Throwable error) {
-            ctx.fail();
+            ctx.fail(error);
           }
         })
         .build());
