@@ -2,18 +2,14 @@ package io.vertx.ext.awssdk;
 
 import com.amazonaws.services.dynamodbv2.local.main.ServerRunner;
 import com.amazonaws.services.dynamodbv2.local.server.DynamoDBProxyServer;
-import com.amazonaws.services.dynamodbv2.local.shared.access.AmazonDynamoDBLocal;
-import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import io.vertx.core.Vertx;
 import org.junit.After;
 import org.junit.Before;
-import com.amazonaws.services.dynamodbv2.local.embedded.DynamoDBEmbedded;
 import org.junit.Test;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
-import software.amazon.awssdk.services.dynamodb.model.AttributeDefinition;
 import software.amazon.awssdk.services.dynamodb.model.CreateTableResponse;
 import software.amazon.awssdk.services.dynamodb.model.KeyType;
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
