@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.core.client.config.SdkAdvancedAsyncClientOption;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.dynamodb.model.CreateTableResponse;
@@ -59,6 +60,9 @@ public class VertxDynamoClientSpec {
     public void testCreateTableWithVertxClient() throws Exception {
         DynamoDbAsyncClient dynamo = DynamoDbAsyncClient.builder()
                 .httpClient(new VertxNioAsyncHttpClient(vertx))
+                .asyncConfiguration(conf ->
+                        conf.advancedOption(SdkAdvancedAsyncClientOption.FUTURE_COMPLETION_EXECUTOR, new VertxExecutor(vertx))
+                )
                 .region(Region.EU_WEST_1)
                 .credentialsProvider(credentialsProvider)
                 .endpointOverride(new URI("http://localhost:8000"))
