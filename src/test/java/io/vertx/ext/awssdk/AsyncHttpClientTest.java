@@ -27,7 +27,7 @@ public class AsyncHttpClientTest {
   private HttpServer server;
   private SdkAsyncHttpClient client;
 
-  private static final int PORT = 9009;
+  private static final int PORT = 8000;
   private static final String HOST = "localhost";
   private static final String SCHEME = "http";
 
