@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'jacoco'
 }
 
 group 'io.vertx'
@@ -36,4 +37,12 @@ task copyNativeDeps(type: Copy) {
 test {
     dependsOn copyNativeDeps
     systemProperty "java.library.path", 'build/libs'
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.destination "${buildDir}/jacocoHtml"
+    }
 }
