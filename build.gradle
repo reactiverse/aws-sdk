@@ -19,11 +19,14 @@ repositories {
 
 dependencies {
     compile 'io.vertx:vertx-core:3.6.0.CR1'
-    compile 'io.vertx:vertx-unit:3.6.0.CR1'
+    compile 'me.escoffier.vertx:vertx-completable-future:0.1.2'
     compile 'software.amazon.awssdk:aws-sdk-java:2.1.0'
 
     testCompile 'junit:junit:4.12'
+    testCompile 'io.vertx:vertx-unit:3.6.0.CR1'
     testCompile 'com.amazonaws:DynamoDBLocal:1.+'
+    testCompile 'ch.qos.logback:logback-classic:1.2.3'
+    testCompile 'ch.qos.logback:logback-core:1.2.3'
 }
 
 /* native (DynamoDB, sqlite stuff) libs should be in classpath */

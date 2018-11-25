@@ -89,6 +89,7 @@ public class AsyncHttpClientTest {
 
   @Test
   public void testPut(TestContext ctx) {
+    final byte[] payload = "the-body".getBytes();
     Async async = ctx.async();
     server.requestHandler(req -> {
       req.bodyHandler(buff -> {
@@ -102,7 +103,8 @@ public class AsyncHttpClientTest {
         .host(HOST)
         .port(PORT)
         .method(SdkHttpMethod.PUT)
-        .contentStreamProvider(() -> new ByteArrayInputStream("the-body".getBytes()))
+        .putHeader("Content-Length", String.valueOf(payload.length))
+        .contentStreamProvider(() -> new ByteArrayInputStream(payload))
         .build();
     client.execute(AsyncExecuteRequest.builder()
         .request(request)
