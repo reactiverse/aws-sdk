@@ -33,7 +33,8 @@ public class SdkToVertxRequestSubscriber implements Subscriber<ByteBuffer> {
             request.setChunked(true);
         }
         */
-        request.write(Buffer.buffer(Unpooled.wrappedBuffer(byteBuffer)));
+        Buffer buffer = Buffer.buffer(Unpooled.wrappedBuffer(byteBuffer));
+        request.write(buffer);
         subscribtion.request(BUFF_SIZE);
     }
 

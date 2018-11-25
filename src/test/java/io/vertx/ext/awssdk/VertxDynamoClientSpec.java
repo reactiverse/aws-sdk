@@ -29,6 +29,7 @@ import java.util.concurrent.CompletableFuture;
 @RunWith(VertxUnitRunner.class)
 public class VertxDynamoClientSpec {
 
+    private final URI uri;
     private final Vertx vertx = Vertx.vertx();
     private DynamoDBProxyServer ddb;
     private static final AwsCredentialsProvider credentialsProvider = () -> new AwsCredentials() {
@@ -42,6 +43,10 @@ public class VertxDynamoClientSpec {
             return "a";
         }
     };
+
+    public VertxDynamoClientSpec() throws Exception {
+        this.uri = new URI("http://localhost:8000");
+    }
 
     @Before
     public void startLocalDynamo(TestContext ctx) {
@@ -70,28 +75,30 @@ public class VertxDynamoClientSpec {
     public void testCreateTableWithVertxClient(TestContext ctx) throws Exception {
         final Async async = ctx.async();
         final Context originalContext = vertx.getOrCreateContext();
-        final DynamoDbAsyncClient dynamo = createClient();
-        final CompletableFuture<CreateTableResponse> createTestTable = dynamo.createTable(this::createTable);
-        createTestTable.handle((response, error) -> {
-            ctx.assertNull(error);
-            ctx.assertNotNull(response);
-            Context callbackContext = vertx.getOrCreateContext();
-            ctx.assertEquals(originalContext, callbackContext);
-            async.complete();
-            return createTestTable;
+        originalContext.runOnContext(v -> {
+            final DynamoDbAsyncClient dynamo = createClient(originalContext);
+            final CompletableFuture<CreateTableResponse> createTestTable = dynamo.createTable(this::createTable);
+            createTestTable.handle((response, error) -> {
+                ctx.assertNull(error);
+                ctx.assertNotNull(response);
+                Context callbackContext = vertx.getOrCreateContext();
+                ctx.assertEquals(originalContext, callbackContext);
+                async.complete();
+                return createTestTable;
+            });
         });
     }
 
 
-    private DynamoDbAsyncClient createClient() throws Exception {
+    private DynamoDbAsyncClient createClient(Context context) {
         return DynamoDbAsyncClient.builder()
                 .httpClient(new VertxNioAsyncHttpClient(vertx))
                 .asyncConfiguration(conf ->
-                        conf.advancedOption(SdkAdvancedAsyncClientOption.FUTURE_COMPLETION_EXECUTOR, new VertxExecutor(vertx))
+                        conf.advancedOption(SdkAdvancedAsyncClientOption.FUTURE_COMPLETION_EXECUTOR, new VertxExecutor(context))
                 )
                 .region(Region.EU_WEST_1)
                 .credentialsProvider(credentialsProvider)
-                .endpointOverride(new URI("http://localhost:8000"))
+                .endpointOverride(uri)
                 .build();
     }
 

@@ -55,7 +55,6 @@ public class AsyncHttpClientTest {
   public void testGet(TestContext ctx) {
     Async async = ctx.async();
     server.requestHandler(req -> {
-      System.out.println("got req");
       req.response().end("foo");
     });
     startServer(ctx);

@@ -31,11 +31,7 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
 
     @Override
     public CompletableFuture<Void> execute(AsyncExecuteRequest asyncExecuteRequest) {
-
         final SdkHttpRequest request = asyncExecuteRequest.request();
-
-
-
         final HttpClient client = vertx.createHttpClient(getClientOptions(request));
         final String fullPath = request.protocol() + "://" + request.host() + ":" + request.port() + request.encodedPath();
         HttpClientRequest vRequest = client.request(awsToVertx(request.method()), fullPath).setFollowRedirects(true);

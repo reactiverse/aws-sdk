@@ -1,5 +1,6 @@
 package io.vertx.ext.awssdk;
 
+import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,16 +15,16 @@ public class VertxExecutor implements Executor {
 
     private final static Logger LOG = LoggerFactory.getLogger(VertxExecutor.class);
 
-    private Vertx vertx;
+    private Context context;
 
-    public VertxExecutor(Vertx vertx) {
-        this.vertx = vertx;
+    public VertxExecutor(Context context) {
+        this.context = context;
     }
 
 
     @Override
     public void execute(Runnable command) {
         LOG.info("Executing command from Vert.x Executor");
-        vertx.runOnContext(v -> command.run());
+        context.runOnContext(v -> command.run());
     }
 }
