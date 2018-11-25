@@ -19,7 +19,6 @@ repositories {
 
 dependencies {
     compile 'io.vertx:vertx-core:3.6.0.CR1'
-    compile 'me.escoffier.vertx:vertx-completable-future:0.1.2'
     compile 'software.amazon.awssdk:aws-sdk-java:2.1.0'
 
     testCompile 'junit:junit:4.12'

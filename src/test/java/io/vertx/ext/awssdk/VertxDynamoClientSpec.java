@@ -75,17 +75,15 @@ public class VertxDynamoClientSpec {
     public void testCreateTableWithVertxClient(TestContext ctx) throws Exception {
         final Async async = ctx.async();
         final Context originalContext = vertx.getOrCreateContext();
-        originalContext.runOnContext(v -> {
-            final DynamoDbAsyncClient dynamo = createClient(originalContext);
-            final CompletableFuture<CreateTableResponse> createTestTable = dynamo.createTable(this::createTable);
-            createTestTable.handle((response, error) -> {
-                ctx.assertNull(error);
-                ctx.assertNotNull(response);
-                Context callbackContext = vertx.getOrCreateContext();
-                ctx.assertEquals(originalContext, callbackContext);
-                async.complete();
-                return createTestTable;
-            });
+        final DynamoDbAsyncClient dynamo = createClient(originalContext);
+        final CompletableFuture<CreateTableResponse> createTestTable = dynamo.createTable(this::createTable);
+        createTestTable.handle((response, error) -> {
+            ctx.assertNull(error);
+            ctx.assertNotNull(response);
+            Context callbackContext = vertx.getOrCreateContext();
+            ctx.assertEquals(originalContext, callbackContext);
+            async.complete();
+            return createTestTable;
         });
     }
 

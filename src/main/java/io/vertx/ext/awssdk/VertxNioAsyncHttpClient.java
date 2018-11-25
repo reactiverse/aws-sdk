@@ -1,14 +1,11 @@
 package io.vertx.ext.awssdk;
 
-import io.netty.handler.codec.http2.Http2SecurityUtil;
-import io.netty.handler.ssl.SupportedCipherSuiteFilter;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.ext.awssdk.reactivestreams.SdkToVertxRequestSubscriber;
 import io.vertx.ext.awssdk.reactivestreams.VertxToSdkResponsePublisher;
-import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
 import software.amazon.awssdk.http.SdkHttpFullResponse;
 import software.amazon.awssdk.http.SdkHttpRequest;
 import software.amazon.awssdk.http.SdkHttpResponse;
@@ -39,7 +36,8 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
             vRequest.putHeader(headerName, String.join(",", headerValues));
         });
         final SdkAsyncHttpResponseHandler responseHandler = asyncExecuteRequest.responseHandler();
-        final CompletableFuture<Void> fut = new VertxCompletableFuture<>(vertx);
+        // final CompletableFuture<Void> fut = new VertxCompletableFuture<>(vertx);
+        final CompletableFuture<Void> fut = new CompletableFuture<>();
         vRequest.exceptionHandler(e -> {
             // responseHandler.onError(e);
             // FIXME: if an error happens and we call "onError" it blocks the thread

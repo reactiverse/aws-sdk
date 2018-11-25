@@ -13,7 +13,7 @@ Look at the tests for more info, but here's an example on how to use DynamoClien
         DynamoDbAsyncClient dynamo = DynamoDbAsyncClient.builder()
                 .httpClient(new VertxNioAsyncHttpClient(vertx))
                 .asyncConfiguration(conf ->
-                        conf.advancedOption(SdkAdvancedAsyncClientOption.FUTURE_COMPLETION_EXECUTOR, new VertxExecutor(vertx))
+                        conf.advancedOption(SdkAdvancedAsyncClientOption.FUTURE_COMPLETION_EXECUTOR, new VertxExecutor(vertx.getOrCreateContext()))
                 )
                 .region(Region.EU_WEST_1)
                 .credentialsProvider(credentialsProvider)
