@@ -22,10 +22,6 @@ Given `context` is a Vert.x `Context` object (either obtained by `vertx.getOrCre
 
 ```
 
-The 2 first configuration lines are important.
-You have to use `VertxNioAsyncHttpClient` to execute SDK http requests and set the `FUTURE_COMPLETION_EXECUTOR` to the Vert.x one.
-
-
 ### Why using `VertxNioAsyncHttpClient`
 
 As you know, Vert.x uses non-blocking IO. This means, among other stuff, that you should never ever block the event-loop.
