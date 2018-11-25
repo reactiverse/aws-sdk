@@ -26,6 +26,8 @@ import java.net.URI;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 
+import static io.vertx.ext.awssdk.VertxSdkClient.withVertx;
+
 @RunWith(VertxUnitRunner.class)
 public class VertxDynamoClientSpec {
 
@@ -72,10 +74,16 @@ public class VertxDynamoClientSpec {
     }
 
     @Test
-    public void testCreateTableWithVertxClient(TestContext ctx) throws Exception {
+    public void testCreateTableWithVertxClient(TestContext ctx) {
         final Async async = ctx.async();
         final Context originalContext = vertx.getOrCreateContext();
-        final DynamoDbAsyncClient dynamo = createClient(originalContext);
+        final DynamoDbAsyncClient dynamo = withVertx(
+                DynamoDbAsyncClient.builder()
+                    .region(Region.EU_WEST_1)
+                    .credentialsProvider(credentialsProvider)
+                    .endpointOverride(uri)
+                , originalContext)
+                .build();
         final CompletableFuture<CreateTableResponse> createTestTable = dynamo.createTable(this::createTable);
         createTestTable.handle((response, error) -> {
             ctx.assertNull(error);
@@ -85,19 +93,6 @@ public class VertxDynamoClientSpec {
             async.complete();
             return createTestTable;
         });
-    }
-
-
-    private DynamoDbAsyncClient createClient(Context context) {
-        return DynamoDbAsyncClient.builder()
-                .httpClient(new VertxNioAsyncHttpClient(vertx))
-                .asyncConfiguration(conf ->
-                        conf.advancedOption(SdkAdvancedAsyncClientOption.FUTURE_COMPLETION_EXECUTOR, new VertxExecutor(context))
-                )
-                .region(Region.EU_WEST_1)
-                .credentialsProvider(credentialsProvider)
-                .endpointOverride(uri)
-                .build();
     }
 
     private void createTable(CreateTableRequest.Builder builder) {

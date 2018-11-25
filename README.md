@@ -7,18 +7,18 @@ This project provides a `VertxNioAsyncHttpClient` so that you can use AWS SDK v2
 
 ### For the impatient 
 
-Look at the tests for more info, but here's an example on how to use DynamoClient (local installation) with Vert.x:
+Look at the tests for more info, but here's an example on how to use DynamoClient (local installation) with Vert.x.
+Given `context` is a Vert.x `Context` object (either obtained by `vertx.getOrCreateContext()` or from a `AbstractVerticle.init` method), you can use `withVertx` utility method to create a client:
 
 ```java
-        DynamoDbAsyncClient dynamo = DynamoDbAsyncClient.builder()
-                .httpClient(new VertxNioAsyncHttpClient(vertx))
-                .asyncConfiguration(conf ->
-                        conf.advancedOption(SdkAdvancedAsyncClientOption.FUTURE_COMPLETION_EXECUTOR, new VertxExecutor(vertx.getOrCreateContext()))
-                )
-                .region(Region.EU_WEST_1)
-                .credentialsProvider(credentialsProvider)
-                .endpointOverride(new URI("http://localhost:8000"))
+        final DynamoDbAsyncClient dynamo = withVertx(
+                DynamoDbAsyncClient.builder()
+                    .region(Region.EU_WEST_1)
+                    .credentialsProvider(credentialsProvider)
+                    .endpointOverride(uri)
+                , context)
                 .build();
+
 
 ```
 
