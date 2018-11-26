@@ -62,5 +62,8 @@ You'll still be targeting AWS S3's REST API, but this time:
 
 ## Contributing
 
-Be aware that in order to run the tests from your IDE, you previously need to execute `gradle copyNativeDeps` so that some libraries are put within `build/libs`.
-Because some tests are requiring an embedded version of AWS services (DynamoDB for instance).
+Tests placed under the `io.vertx.ext.awssdk.integration` package are using `localstack`: a huge set of utilities (docker images) emulating AWS Services (DynamoDB, Kinesis, S3, etc.).
+In order to do so, they require a local docker daemon running on the machine.
+They will download docker images from the docker hub, run the appropriate service as a docker container, then test the code against this local docker container. 
+
+They'll only be executed if the system property `tests.integration` is set to `localstack`. They'll be ignored otherwise.

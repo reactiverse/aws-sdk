@@ -3,26 +3,27 @@ package io.vertx.ext.awssdk;
 import io.netty.buffer.Unpooled;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.Timeout;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import io.vertx.junit5.Timeout;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.reactivestreams.Publisher;
 import software.amazon.awssdk.core.internal.http.async.SimpleHttpContentPublisher;
 import software.amazon.awssdk.http.*;
 import software.amazon.awssdk.http.async.*;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 
-@RunWith(VertxUnitRunner.class)
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@ExtendWith(VertxExtension.class)
 public class AsyncHttpClientTest {
 
   private Vertx vertx;
@@ -33,32 +34,32 @@ public class AsyncHttpClientTest {
   private static final String HOST = "localhost";
   private static final String SCHEME = "http";
 
-  @Rule
-  public Timeout rule = Timeout.seconds(1);
-
-  @Before
+  @BeforeEach
   public void setUp() {
     vertx = Vertx.vertx();
     server = vertx.createHttpServer();
     client = new VertxNioAsyncHttpClient(vertx);
   }
 
-  @After
-  public void tearDown(TestContext ctx) {
+  @AfterEach
+  public void tearDown(VertxTestContext ctx) {
       if (server == null) {
           return;
       }
-      server.close(ctx.asyncAssertSuccess());
+      server.close(res -> {
+          assertTrue(res.succeeded());
+          ctx.completeNow();
+      });
   }
 
   @Test
-  public void testGet(TestContext ctx) {
-    Async async = ctx.async();
+  @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+  public void testGet(VertxTestContext ctx) {
     server.requestHandler(req -> {
       req.response().end("foo");
     });
     server.listen(PORT, HOST, res -> {
-        ctx.assertTrue(res.succeeded());
+        assertTrue(res.succeeded());
         client.execute(AsyncExecuteRequest.builder()
                 .request(SdkHttpRequest
                         .builder()
@@ -70,18 +71,18 @@ public class AsyncHttpClientTest {
                 .responseHandler(new SdkAsyncHttpResponseHandler() {
                     @Override
                     public void onHeaders(SdkHttpResponse headers) {
-                        ctx.assertEquals(200, headers.statusCode());
+                        assertEquals(200, headers.statusCode());
                     }
                     @Override
                     public void onStream(Publisher<ByteBuffer> stream) {
                         stream.subscribe(new SimpleSubscriber(body -> {
-                            ctx.assertEquals("foo", Unpooled.wrappedBuffer(body).toString(StandardCharsets.UTF_8));
-                            async.complete();
+                            assertEquals("foo", Unpooled.wrappedBuffer(body).toString(StandardCharsets.UTF_8));
+                            ctx.completeNow();
                         }));
                     }
                     @Override
                     public void onError(Throwable error) {
-                        ctx.fail(error);
+                        throw new RuntimeException(error);
                     }
                 })
                 .build());
@@ -89,16 +90,16 @@ public class AsyncHttpClientTest {
   }
 
   @Test
-  public void testPut(TestContext ctx) {
+  public void testPut(VertxTestContext ctx) {
     final byte[] payload = "the-body".getBytes();
-    Async async = ctx.async();
+
     server.requestHandler(req -> {
       req.bodyHandler(buff -> {
         req.response().end(buff);
       });
     });
       server.listen(PORT, HOST, res -> {
-          ctx.assertTrue(res.succeeded());
+          assertTrue(res.succeeded());
           SdkHttpFullRequest request = SdkHttpFullRequest
                   .builder()
                   .protocol(SCHEME)
@@ -114,20 +115,20 @@ public class AsyncHttpClientTest {
                   .responseHandler(new SdkAsyncHttpResponseHandler() {
                       @Override
                       public void onHeaders(SdkHttpResponse headers) {
-                          ctx.assertEquals(200, headers.statusCode());
+                          assertEquals(200, headers.statusCode());
                       }
 
                       @Override
                       public void onStream(Publisher<ByteBuffer> stream) {
                           stream.subscribe(new SimpleSubscriber(body -> {
-                              ctx.assertEquals("the-body", Unpooled.wrappedBuffer(body).toString(StandardCharsets.UTF_8));
-                              async.complete();
+                              assertEquals("the-body", Unpooled.wrappedBuffer(body).toString(StandardCharsets.UTF_8));
+                              ctx.completeNow();
                           }));
                       }
 
                       @Override
                       public void onError(Throwable error) {
-                          ctx.fail(error);
+                          throw new RuntimeException(error);
                       }
                   })
                   .build());

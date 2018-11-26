@@ -1,6 +1,8 @@
 buildscript {
     ext.vertx_version = '3.6.0.CR1'
     ext.aws_sdk_version = '2.1.0'
+    ext.junit5_version = '5.3.1'
+
 }
 
 plugins {
@@ -16,38 +18,24 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
-    maven {
-        url 'https://s3-us-west-2.amazonaws.com/dynamodb-local/release'
-    }
-
 }
 
 dependencies {
     compile "io.vertx:vertx-core:${vertx_version}"
     compile "software.amazon.awssdk:aws-sdk-java:${aws_sdk_version}"
 
-    testCompile 'junit:junit:4.12'
-    testCompile "io.vertx:vertx-unit:${vertx_version}"
-    testCompile 'com.amazonaws:DynamoDBLocal:1.+'
+    testCompile "io.vertx:vertx-junit5:${vertx_version}"
+    testCompile "io.vertx:vertx-rx-java2:${vertx_version}"
+    testCompile 'cloud.localstack:localstack-utils:0.1.15'
     testCompile 'ch.qos.logback:logback-classic:1.2.3'
     testCompile 'ch.qos.logback:logback-core:1.2.3'
+
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junit5_version}"
 }
 
-/* native (DynamoDB, sqlite stuff) libs should be in classpath */
-task copyNativeDeps(type: Copy) {
-    from(configurations.compile + configurations.testCompile) {
-        include '*.dll'
-        include '*.dylib'
-        include '*.so'
-    }
-    into 'build/libs'
-}
 test {
-    dependsOn copyNativeDeps
-    systemProperty "java.library.path", 'build/libs'
-    testLogging {
-        exceptionFormat = 'full'
-    }
+    useJUnitPlatform()
+    systemProperties System.properties
 }
 
 jacocoTestReport {

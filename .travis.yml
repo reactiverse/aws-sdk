@@ -1,10 +1,12 @@
 language: java
 sudo: required
+services:
+  - docker
 jdk:
-- oraclejdk8
-script: gradle test jacocoTestReport -i
+  - oraclejdk8
+script: gradle -Dtests.integration=localstack jacocoTestReport
 before_cache:
-- rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 cache:
   directories:
   - $HOME/.gradle/caches/

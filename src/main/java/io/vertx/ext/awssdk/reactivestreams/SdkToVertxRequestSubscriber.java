@@ -3,6 +3,7 @@ package io.vertx.ext.awssdk.reactivestreams;
 import io.netty.buffer.Unpooled;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpHeaders;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -26,12 +27,9 @@ public class SdkToVertxRequestSubscriber implements Subscriber<ByteBuffer> {
 
     @Override
     public void onNext(ByteBuffer byteBuffer) {
-        /*
-        Fools AWS signing algorithm
-        if (!request.isChunked()) {
+        if (!request.isChunked() && !request.headers().contains(HttpHeaders.CONTENT_LENGTH)) {
             request.setChunked(true);
         }
-        */
         Buffer buffer = Buffer.buffer(Unpooled.wrappedBuffer(byteBuffer));
         request.write(buffer);
         subscribtion.request(BUFF_SIZE);

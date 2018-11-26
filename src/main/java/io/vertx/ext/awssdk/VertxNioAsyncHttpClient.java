@@ -4,8 +4,11 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.ext.awssdk.reactivestreams.SdkToVertxRequestSubscriber;
 import io.vertx.ext.awssdk.reactivestreams.VertxToSdkResponsePublisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.http.SdkHttpFullResponse;
 import software.amazon.awssdk.http.SdkHttpRequest;
 import software.amazon.awssdk.http.SdkHttpResponse;
@@ -19,6 +22,8 @@ import java.util.concurrent.CompletableFuture;
 import static io.vertx.ext.awssdk.converters.MethodConverter.awsToVertx;
 
 public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
+
+    private final Logger LOG = LoggerFactory.getLogger(VertxNioAsyncHttpClient.class);
 
     private final Vertx vertx;
 
