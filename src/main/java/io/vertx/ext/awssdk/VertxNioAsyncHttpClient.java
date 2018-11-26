@@ -29,21 +29,16 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
     @Override
     public CompletableFuture<Void> execute(AsyncExecuteRequest asyncExecuteRequest) {
         final SdkHttpRequest request = asyncExecuteRequest.request();
+        final SdkAsyncHttpResponseHandler responseHandler = asyncExecuteRequest.responseHandler();
         final HttpClient client = vertx.createHttpClient(getClientOptions(request));
         final String fullPath = request.protocol() + "://" + request.host() + ":" + request.port() + request.encodedPath();
-        HttpClientRequest vRequest = client.request(awsToVertx(request.method()), fullPath).setFollowRedirects(true);
+        final CompletableFuture<Void> fut = new CompletableFuture<>();
+
+        final HttpClientRequest vRequest = client.request(awsToVertx(request.method()), fullPath).setFollowRedirects(true);
         request.headers().forEach((headerName, headerValues) -> {
             vRequest.putHeader(headerName, String.join(",", headerValues));
         });
-        final SdkAsyncHttpResponseHandler responseHandler = asyncExecuteRequest.responseHandler();
-        // final CompletableFuture<Void> fut = new VertxCompletableFuture<>(vertx);
-        final CompletableFuture<Void> fut = new CompletableFuture<>();
-        vRequest.exceptionHandler(e -> {
-            // responseHandler.onError(e);
-            // FIXME: if an error happens and we call "onError" it blocks the thread
-            // if we don't, AWS SDK is retrying anyway, but without blocking
-            fut.completeExceptionally(e);
-        });
+        vRequest.exceptionHandler(fut::completeExceptionally);
         vRequest.handler(vResponse -> {
             final SdkHttpFullResponse.Builder builder = SdkHttpResponse.builder()
                     .statusCode(vResponse.statusCode())
@@ -54,7 +49,7 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
             responseHandler.onHeaders(builder.build());
             responseHandler.onStream(new VertxToSdkResponsePublisher(vResponse, fut));
         });
-        SdkHttpContentPublisher publisher = asyncExecuteRequest.requestContentPublisher();
+        final SdkHttpContentPublisher publisher = asyncExecuteRequest.requestContentPublisher();
         if (publisher != null) {
             publisher.subscribe(new SdkToVertxRequestSubscriber(vRequest));
         } else {
@@ -74,8 +69,5 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
     }
 
     @Override
-    public void close() {
-        // TODO : close the client ?
-        // nope ? many requests can come
-    }
+    public void close() {}
 }

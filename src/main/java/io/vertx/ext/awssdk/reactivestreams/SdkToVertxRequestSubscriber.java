@@ -1,6 +1,5 @@
 package io.vertx.ext.awssdk.reactivestreams;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientRequest;

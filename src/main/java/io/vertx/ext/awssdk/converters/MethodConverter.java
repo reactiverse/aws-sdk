@@ -4,7 +4,6 @@ import io.vertx.core.http.HttpMethod;
 import software.amazon.awssdk.http.SdkHttpMethod;
 
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 
 public final class MethodConverter {

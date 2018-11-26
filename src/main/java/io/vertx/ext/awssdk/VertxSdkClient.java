@@ -1,7 +1,6 @@
 package io.vertx.ext.awssdk;
 
 import io.vertx.core.Context;
-import io.vertx.core.Vertx;
 import software.amazon.awssdk.awscore.client.builder.AwsAsyncClientBuilder;
 import software.amazon.awssdk.core.SdkClient;
 import software.amazon.awssdk.core.client.config.SdkAdvancedAsyncClientOption;
