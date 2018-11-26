@@ -5,9 +5,11 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.Timeout;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.reactivestreams.Publisher;
@@ -31,6 +33,8 @@ public class AsyncHttpClientTest {
   private static final String HOST = "localhost";
   private static final String SCHEME = "http";
 
+  @Rule
+  public Timeout rule = Timeout.seconds(1);
 
   @Before
   public void setUp() {
@@ -47,43 +51,41 @@ public class AsyncHttpClientTest {
       server.close(ctx.asyncAssertSuccess());
   }
 
-  private void startServer(TestContext ctx) {
-    server.listen(PORT, HOST, ctx.asyncAssertSuccess());
-  }
-
   @Test
   public void testGet(TestContext ctx) {
     Async async = ctx.async();
     server.requestHandler(req -> {
       req.response().end("foo");
     });
-    startServer(ctx);
-    client.execute(AsyncExecuteRequest.builder()
-        .request(SdkHttpRequest
-            .builder()
-            .protocol(SCHEME)
-            .host(HOST)
-            .port(PORT)
-            .method(SdkHttpMethod.GET)
-            .build())
-        .responseHandler(new SdkAsyncHttpResponseHandler() {
-          @Override
-          public void onHeaders(SdkHttpResponse headers) {
-            ctx.assertEquals(200, headers.statusCode());
-          }
-          @Override
-          public void onStream(Publisher<ByteBuffer> stream) {
-            stream.subscribe(new SimpleSubscriber(body -> {
-              ctx.assertEquals("foo", Unpooled.wrappedBuffer(body).toString(StandardCharsets.UTF_8));
-              async.complete();
-            }));
-          }
-          @Override
-          public void onError(Throwable error) {
-            ctx.fail(error);
-          }
-        })
-        .build());
+    server.listen(PORT, HOST, res -> {
+        ctx.assertTrue(res.succeeded());
+        client.execute(AsyncExecuteRequest.builder()
+                .request(SdkHttpRequest
+                        .builder()
+                        .protocol(SCHEME)
+                        .host(HOST)
+                        .port(PORT)
+                        .method(SdkHttpMethod.GET)
+                        .build())
+                .responseHandler(new SdkAsyncHttpResponseHandler() {
+                    @Override
+                    public void onHeaders(SdkHttpResponse headers) {
+                        ctx.assertEquals(200, headers.statusCode());
+                    }
+                    @Override
+                    public void onStream(Publisher<ByteBuffer> stream) {
+                        stream.subscribe(new SimpleSubscriber(body -> {
+                            ctx.assertEquals("foo", Unpooled.wrappedBuffer(body).toString(StandardCharsets.UTF_8));
+                            async.complete();
+                        }));
+                    }
+                    @Override
+                    public void onError(Throwable error) {
+                        ctx.fail(error);
+                    }
+                })
+                .build());
+    });
   }
 
   @Test
@@ -95,38 +97,41 @@ public class AsyncHttpClientTest {
         req.response().end(buff);
       });
     });
-    startServer(ctx);
-    SdkHttpFullRequest request = SdkHttpFullRequest
-        .builder()
-        .protocol(SCHEME)
-        .host(HOST)
-        .port(PORT)
-        .method(SdkHttpMethod.PUT)
-        .putHeader("Content-Length", String.valueOf(payload.length))
-        .contentStreamProvider(() -> new ByteArrayInputStream(payload))
-        .build();
-    client.execute(AsyncExecuteRequest.builder()
-        .request(request)
-        .requestContentPublisher(new SimpleHttpContentPublisher(request))
-        .responseHandler(new SdkAsyncHttpResponseHandler() {
-          @Override
-          public void onHeaders(SdkHttpResponse headers) {
-            ctx.assertEquals(200, headers.statusCode());
-          }
-          @Override
-          public void onStream(Publisher<ByteBuffer> stream) {
-            stream.subscribe(new SimpleSubscriber(body -> {
-              ctx.assertEquals("the-body", Unpooled.wrappedBuffer(body).toString(StandardCharsets.UTF_8));
-              async.complete();
-            }));
-          }
-          @Override
-          public void onError(Throwable error) {
-            ctx.fail(error);
-          }
-        })
-        .build());
+      server.listen(PORT, HOST, res -> {
+          ctx.assertTrue(res.succeeded());
+          SdkHttpFullRequest request = SdkHttpFullRequest
+                  .builder()
+                  .protocol(SCHEME)
+                  .host(HOST)
+                  .port(PORT)
+                  .method(SdkHttpMethod.PUT)
+                  .putHeader("Content-Length", String.valueOf(payload.length))
+                  .contentStreamProvider(() -> new ByteArrayInputStream(payload))
+                  .build();
+          client.execute(AsyncExecuteRequest.builder()
+                  .request(request)
+                  .requestContentPublisher(new SimpleHttpContentPublisher(request))
+                  .responseHandler(new SdkAsyncHttpResponseHandler() {
+                      @Override
+                      public void onHeaders(SdkHttpResponse headers) {
+                          ctx.assertEquals(200, headers.statusCode());
+                      }
 
+                      @Override
+                      public void onStream(Publisher<ByteBuffer> stream) {
+                          stream.subscribe(new SimpleSubscriber(body -> {
+                              ctx.assertEquals("the-body", Unpooled.wrappedBuffer(body).toString(StandardCharsets.UTF_8));
+                              async.complete();
+                          }));
+                      }
+
+                      @Override
+                      public void onError(Throwable error) {
+                          ctx.fail(error);
+                      }
+                  })
+                  .build());
+      });
   }
 
 }
