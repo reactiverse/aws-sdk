@@ -60,7 +60,7 @@ You'll still be targeting AWS S3's REST API, but this time:
 * using Vert.x's HTTP client 
 * taking good care that the `CompletableFuture<?>`'s callback will be executed in the same Vert.x context that the one that made the request
 
-### Contributing
+## Contributing
 
 Be aware that in order to run the tests from your IDE, you previously need to execute `gradle copyNativeDeps` so that some libraries are put within `build/libs`.
 Because some tests are requiring an embedded version of AWS services (DynamoDB for instance).
