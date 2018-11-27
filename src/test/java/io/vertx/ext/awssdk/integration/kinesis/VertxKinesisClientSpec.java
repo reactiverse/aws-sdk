@@ -1,15 +1,18 @@
 package io.vertx.ext.awssdk.integration.kinesis;
 
 import cloud.localstack.docker.LocalstackDocker;
+import cloud.localstack.docker.LocalstackDockerExtension;
 import cloud.localstack.docker.annotation.LocalstackDockerProperties;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.ext.awssdk.integration.LocalStackBaseSpec;
 import io.vertx.junit5.Timeout;
+import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
+import org.junit.jupiter.api.extension.ExtendWith;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.core.SdkSystemSetting;
 import software.amazon.awssdk.regions.Region;
@@ -18,7 +21,6 @@ import software.amazon.awssdk.services.kinesis.KinesisAsyncClientBuilder;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.model.CreateStreamResponse;
 import software.amazon.awssdk.services.kinesis.model.DescribeStreamRequest;
-import software.amazon.awssdk.services.kinesis.model.DescribeStreamResponse;
 import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
 import software.amazon.awssdk.services.kinesis.model.PutRecordResponse;
 import software.amazon.awssdk.services.kinesis.model.Record;
@@ -36,6 +38,8 @@ import static io.vertx.ext.awssdk.VertxSdkClient.withVertx;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@ExtendWith(VertxExtension.class)
+@ExtendWith(LocalstackDockerExtension.class)
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
 @LocalstackDockerProperties(services = { "kinesis" })
 public class VertxKinesisClientSpec extends LocalStackBaseSpec {
@@ -79,13 +83,17 @@ public class VertxKinesisClientSpec extends LocalStackBaseSpec {
     public void testPubSub(Vertx vertx, VertxTestContext ctx) throws Exception {
         final Context originalContext = vertx.getOrCreateContext();
         final KinesisAsyncClient kinesis = kinesis(originalContext);
-        single(kinesis.describeStream(this::streamDesc)).flatMap(descRes -> {
-            String shardId = descRes.streamDescription().shards().get(0).shardId();
-            return single(kinesis.getShardIterator(this.shardIterator(shardId)));
-        }).doOnSuccess(getShardRes -> {
-                startPolling(vertx, ctx, kinesis, originalContext, getShardRes.shardIterator());
-                publishTestRecord(kinesis);
-        }).doOnError(ctx::failNow).subscribe();
+        single(kinesis.describeStream(this::streamDesc))
+                .flatMap(descRes -> {
+                    String shardId = descRes.streamDescription().shards().get(0).shardId();
+                    return single(kinesis.getShardIterator(this.shardIterator(shardId)));
+                })
+                .doOnSuccess(getShardRes -> {
+                    startPolling(vertx, ctx, kinesis, originalContext, getShardRes.shardIterator());
+                    publishTestRecord(kinesis);
+                })
+                .doOnError(ctx::failNow)
+                .subscribe();
     }
 
     private CompletableFuture<PutRecordResponse> publishTestRecord(KinesisAsyncClient kinesis) {

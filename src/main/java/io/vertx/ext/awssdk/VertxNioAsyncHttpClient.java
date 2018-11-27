@@ -4,9 +4,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpHeaders;
-import io.vertx.ext.awssdk.reactivestreams.SdkToVertxRequestSubscriber;
-import io.vertx.ext.awssdk.reactivestreams.VertxToSdkResponsePublisher;
+import io.vertx.ext.awssdk.reactivestreams.HttpClientRequestSubscriber;
+import io.vertx.ext.awssdk.reactivestreams.ReadStreamPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.http.SdkHttpFullResponse;
@@ -43,7 +42,10 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
         request.headers().forEach((headerName, headerValues) -> {
             vRequest.putHeader(headerName, String.join(",", headerValues));
         });
-        vRequest.exceptionHandler(fut::completeExceptionally);
+        vRequest.exceptionHandler(error -> {
+            responseHandler.onError(error);
+            fut.completeExceptionally(error);
+        });
         vRequest.handler(vResponse -> {
             final SdkHttpFullResponse.Builder builder = SdkHttpResponse.builder()
                     .statusCode(vResponse.statusCode())
@@ -52,11 +54,11 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
                     builder.appendHeader(e.getKey(), e.getValue())
             );
             responseHandler.onHeaders(builder.build());
-            responseHandler.onStream(new VertxToSdkResponsePublisher(vResponse, fut));
+            responseHandler.onStream(new ReadStreamPublisher<>(vResponse, fut));
         });
         final SdkHttpContentPublisher publisher = asyncExecuteRequest.requestContentPublisher();
         if (publisher != null) {
-            publisher.subscribe(new SdkToVertxRequestSubscriber(vRequest));
+            publisher.subscribe(new HttpClientRequestSubscriber(vRequest));
         } else {
             vRequest.end();
         }

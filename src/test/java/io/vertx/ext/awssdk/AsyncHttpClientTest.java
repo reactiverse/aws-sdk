@@ -12,8 +12,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.reactivestreams.Publisher;
 import software.amazon.awssdk.core.internal.http.async.SimpleHttpContentPublisher;
-import software.amazon.awssdk.http.*;
-import software.amazon.awssdk.http.async.*;
+import software.amazon.awssdk.http.SdkHttpFullRequest;
+import software.amazon.awssdk.http.SdkHttpMethod;
+import software.amazon.awssdk.http.SdkHttpRequest;
+import software.amazon.awssdk.http.SdkHttpResponse;
+import software.amazon.awssdk.http.async.AsyncExecuteRequest;
+import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
+import software.amazon.awssdk.http.async.SdkAsyncHttpResponseHandler;
+import software.amazon.awssdk.http.async.SimpleSubscriber;
 
 import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
