@@ -18,10 +18,13 @@ import software.amazon.awssdk.services.kinesis.KinesisAsyncClientBuilder;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.model.CreateStreamResponse;
 import software.amazon.awssdk.services.kinesis.model.DescribeStreamRequest;
+import software.amazon.awssdk.services.kinesis.model.DescribeStreamResponse;
 import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
 import software.amazon.awssdk.services.kinesis.model.PutRecordResponse;
 import software.amazon.awssdk.services.kinesis.model.Record;
 import software.amazon.awssdk.services.kinesis.model.ShardIteratorType;
+import software.amazon.awssdk.services.kinesis.model.StreamDescription;
+import software.amazon.awssdk.services.kinesis.model.StreamStatus;
 
 import java.net.URI;
 import java.util.List;
@@ -41,9 +44,12 @@ public class VertxKinesisClientSpec extends LocalStackBaseSpec {
     private final static SdkBytes DATA = SdkBytes.fromByteArray("Hello".getBytes());
 
     private String currentShardIterator;
+    private long pollTimer = -1;
+    private long streamTimer = -1;
 
     /**
      * Just create the Stream in a synchronous fashion, not using Vert.x
+     * And wait for the stream to be created & ready (with the right nb. of shards)
      */
     @BeforeAll
     public static void createStream() throws Exception {
@@ -55,6 +61,17 @@ public class VertxKinesisClientSpec extends LocalStackBaseSpec {
                 .build();
         CreateStreamResponse resp = client.createStream(cs -> cs.streamName(STREAM).shardCount(1));
         assertNotNull(resp);
+        // README: Stream creation can take some time. We have to wait or the Stream to be "ACTIVE" before making actual tests
+        boolean streamReady = false;
+        while(!streamReady) {
+            Thread.sleep(1000L); // AWS recommendation: polling-frequency (even for DescribeStream) <= 1000ms
+            final StreamDescription desc = client.describeStream(ds -> ds.streamName(STREAM)).streamDescription();
+            streamReady = desc.streamStatus().equals(StreamStatus.ACTIVE);
+            if (streamReady) {
+                // Check that we have the correct number of shards before starting the actual testing
+                assertEquals(1, desc.shards().size());
+            }
+        }
     }
 
     @Test
@@ -82,6 +99,7 @@ public class VertxKinesisClientSpec extends LocalStackBaseSpec {
     private void startPolling(Vertx vertx, VertxTestContext ctx, KinesisAsyncClient kinesis, Context originalContext, String shardIteratorId) {
         currentShardIterator = shardIteratorId;
         vertx.setPeriodic(1000L, t -> {
+            pollTimer = t;
             kinesis.getRecords(rc ->
                     rc.shardIterator(currentShardIterator).limit(1)
             ).handle((getRecRes, getRecError) -> {
@@ -90,9 +108,16 @@ public class VertxKinesisClientSpec extends LocalStackBaseSpec {
                     return null;
                 }
                 final List<Record> recs = getRecRes.records();
-                assertEquals(1, recs.size());
-                assertEquals(DATA, recs.get(0).data());
-                ctx.completeNow();
+                if (recs.size() > 0) {
+                    assertEquals(1, recs.size());
+                    assertEquals(DATA, recs.get(0).data());
+                    if (pollTimer > -1) {
+                        vertx.cancelTimer(pollTimer);
+                    }
+                    ctx.completeNow();
+                } else {
+                    currentShardIterator = getRecRes.nextShardIterator();
+                }
                 return null;
             });
         });
