@@ -1,6 +1,7 @@
 package io.vertx.ext.awssdk.reactivestreams;
 
-import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.streams.ReadStream;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -8,13 +9,17 @@ import org.reactivestreams.Subscription;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
-public class VertxToSdkResponsePublisher implements Publisher<ByteBuffer> {
+public class ReadStreamPublisher<T extends Buffer> implements Publisher<ByteBuffer> {
 
-    private HttpClientResponse response;
+    private ReadStream<T> stream;
     private CompletableFuture<Void> future;
 
-    public VertxToSdkResponsePublisher(HttpClientResponse response, CompletableFuture<Void> future) {
-        this.response = response;
+    public ReadStreamPublisher(ReadStream<T> readStream) {
+        this(readStream, null);
+    }
+
+    public ReadStreamPublisher(ReadStream<T> readStream, CompletableFuture<Void> future) {
+        this.stream = readStream;
         this.future = future;
     }
 
@@ -23,19 +28,21 @@ public class VertxToSdkResponsePublisher implements Publisher<ByteBuffer> {
         s.onSubscribe(new Subscription() {
             @Override
             public void request(long n) {
-                response.fetch(n);
+                stream.fetch(n);
             }
 
             @Override
             public void cancel() {}
         });
-        response.endHandler(v -> {
+        stream.endHandler(v -> {
             s.onComplete();
-            future.complete(null);
+            if (future != null) {
+                future.complete(null);
+            }
         });
-        response.handler(buff ->
+        stream.handler(buff ->
                 s.onNext(ByteBuffer.wrap(buff.getBytes()))
         );
-        response.exceptionHandler(s::onError);
+        stream.exceptionHandler(s::onError);
     }
 }
