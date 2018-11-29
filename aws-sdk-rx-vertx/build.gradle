@@ -1,0 +1,45 @@
+buildscript {
+    ext.aws_sdk_vertx_version = '1.0-SNAPSHOT'
+    ext.vertx_version = '3.6.0.CR1'
+}
+
+plugins {
+    id 'java'
+    id 'maven'
+}
+
+group 'io.vertx'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+sourceSets {
+    main {
+        java {
+            srcDirs("generated-src", "src/main/java")
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile rootProject
+    compile "io.vertx:vertx-rx-java2:${vertx_version}"
+    compile 'io.github.classgraph:classgraph:4.4.12'
+    compile 'com.squareup:javapoet:1.11.1'
+    compile 'ch.qos.logback:logback-classic:1.2.3'
+    compile 'ch.qos.logback:logback-core:1.2.3'
+
+    testCompile "io.vertx:vertx-junit5:${vertx_version}"
+    testCompile 'cloud.localstack:localstack-utils:0.1.15'
+
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junit5_version}"
+}
+
+test {
+    useJUnitPlatform()
+    systemProperties System.properties
+}

@@ -1,2 +1,4 @@
-rootProject.name = 'aws-sdk'
+rootProject.name = 'aws-sdk-vertx'
+include 'aws-sdk-rx-vertx'
+
 
