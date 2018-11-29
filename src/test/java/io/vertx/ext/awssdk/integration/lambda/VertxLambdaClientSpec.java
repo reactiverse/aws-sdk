@@ -48,7 +48,7 @@ public class VertxLambdaClientSpec extends LocalStackBaseSpec {
     private LambdaAsyncClient lambdaClient;
 
     @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    @Timeout(value = 15, timeUnit = TimeUnit.SECONDS)
     public void testCreateThenInvokeLambda(Vertx vertx, VertxTestContext ctx) throws Exception {
         final Context originalContext = vertx.getOrCreateContext();
         lambdaClient = createLambdaClient(originalContext);

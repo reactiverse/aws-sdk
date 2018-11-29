@@ -62,7 +62,7 @@ public class VertxCloudWatchClientSpec extends LocalStackBaseSpec {
 
 
     @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    @Timeout(value = 15, timeUnit = TimeUnit.SECONDS)
     public void testCreateDashboard(Vertx vertx, VertxTestContext ctx) throws Exception {
         final Context originalContext = vertx.getOrCreateContext();
         final CloudWatchAsyncClient cloudwatch = cloudwatchClient(originalContext);

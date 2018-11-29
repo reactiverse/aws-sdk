@@ -59,7 +59,7 @@ public class AsyncHttpClientTest {
   }
 
   @Test
-  @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+  @Timeout(value = 15, timeUnit = TimeUnit.SECONDS)
   public void testGet(VertxTestContext ctx) {
     server.requestHandler(req -> {
       req.response().end("foo");
@@ -96,6 +96,7 @@ public class AsyncHttpClientTest {
   }
 
   @Test
+  @Timeout(value = 15, timeUnit = TimeUnit.SECONDS)
   public void testPut(VertxTestContext ctx) {
     final byte[] payload = "the-body".getBytes();
 

@@ -79,7 +79,7 @@ public class VertxKinesisClientSpec extends LocalStackBaseSpec {
     }
 
     @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    @Timeout(value = 15, timeUnit = TimeUnit.SECONDS)
     public void testPubSub(Vertx vertx, VertxTestContext ctx) throws Exception {
         final Context originalContext = vertx.getOrCreateContext();
         final KinesisAsyncClient kinesis = kinesis(originalContext);

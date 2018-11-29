@@ -46,7 +46,7 @@ public class VertxDynamoClientSpec extends LocalStackBaseSpec {
     }
 
     @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    @Timeout(value = 15, timeUnit = TimeUnit.SECONDS)
     public void createTableThenInsertThenGet(Vertx vertx, VertxTestContext ctx) throws Exception {
         final Context originalContext = vertx.getOrCreateContext();
         final DynamoDbAsyncClient dynamo = dynamo(originalContext);
