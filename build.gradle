@@ -1,5 +1,5 @@
 buildscript {
-    ext.vertx_version = '3.6.0.CR1'
+    ext.vertx_version = '3.6.2'
     ext.aws_sdk_version = '2.1.0'
     ext.junit5_version = '5.3.1'
 
