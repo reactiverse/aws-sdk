@@ -90,13 +90,11 @@ public class VertxApiGatewaySpec extends LocalStackBaseSpec {
                     assertEquals(originalContext, vertx.getOrCreateContext());
                     return declare200ResponseToGet();
                 })
-                .doOnSuccess(res ->
-                        ctx.completeNow()
-                )
-                .doOnError(ctx::failNow)
-                .subscribe();
+                .subscribe(res -> {
+                    assertEquals(originalContext, vertx.getOrCreateContext());
+                    ctx.completeNow();
+                }, ctx::failNow);
     }
-
 
     private Single<CreateRestApiResponse> createRestApi() {
         return single(gatewayClient.createRestApi(VertxApiGatewaySpec::restApiDefinition));
