@@ -59,6 +59,9 @@ public class VertxApiGatewaySpec extends LocalStackBaseSpec {
     private String parentId;
     private String resourceId;
 
+    // README: see below for the full test
+    // But: https://github.com/localstack/localstack/issues/1030
+    // For now we're just testing creation requests, but not the actual routing one, because localstack doesn't allow it
     @Test
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
     public void testRequestThroughGateway(Vertx vertx, VertxTestContext ctx) throws Exception {
@@ -89,29 +92,11 @@ public class VertxApiGatewaySpec extends LocalStackBaseSpec {
                 })
                 .doOnSuccess(res ->
                         ctx.completeNow()
-                ) // FIXME: see below for the full test but: https://github.com/localstack/localstack/issues/1030
-                /*
-                .flatMap(res -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
-                    return attachRemoteEndpoint();
-                })
-                .flatMap(res -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
-                    return mapRemoteResponse();
-                })
-                .flatMap(res -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
-                    return makeIntegrationTest();
-                })
-                .doOnSuccess(integrationTest -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
-                    assertEquals(integrationTest.body(), MOCK_RESPONSE);
-                    ctx.completeNow();
-                })
-                */
+                )
                 .doOnError(ctx::failNow)
                 .subscribe();
     }
+
 
     private Single<CreateRestApiResponse> createRestApi() {
         return single(gatewayClient.createRestApi(VertxApiGatewaySpec::restApiDefinition));
@@ -200,5 +185,25 @@ public class VertxApiGatewaySpec extends LocalStackBaseSpec {
                 .endpointOverride(gatewayURI);
         gatewayClient = withVertx(builder, context).build();
     }
+
+    /*
+    .flatMap(res -> {
+        assertEquals(originalContext, vertx.getOrCreateContext());
+        return attachRemoteEndpoint();
+    })
+    .flatMap(res -> {
+        assertEquals(originalContext, vertx.getOrCreateContext());
+        return mapRemoteResponse();
+    })
+    .flatMap(res -> {
+        assertEquals(originalContext, vertx.getOrCreateContext());
+        return makeIntegrationTest();
+    })
+    .doOnSuccess(integrationTest -> {
+        assertEquals(originalContext, vertx.getOrCreateContext());
+        assertEquals(integrationTest.body(), MOCK_RESPONSE);
+        ctx.completeNow();
+    })
+    */
 
 }

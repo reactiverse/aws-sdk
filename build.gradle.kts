@@ -1,6 +1,6 @@
 val vertxVersion = "3.6.2"
 val awsSdkVersion = "2.1.0"
-val junit5Version = "5.3.1"
+val junit5Version = "5.4.0-M1"
 val logbackVersion = "1.2.3"
 val integrationOption = "tests.integration"
 
@@ -33,7 +33,7 @@ dependencies {
     testCompile("ch.qos.logback:logback-classic:$logbackVersion")
     testCompile("ch.qos.logback:logback-core:$logbackVersion")
 
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junit5Version")
+    testCompile("org.junit.jupiter:junit-jupiter-engine:$junit5Version")
 }
 
 tasks.withType<Test> {

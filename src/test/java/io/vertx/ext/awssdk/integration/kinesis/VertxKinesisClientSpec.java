@@ -87,13 +87,10 @@ public class VertxKinesisClientSpec extends LocalStackBaseSpec {
                 .flatMap(descRes -> {
                     String shardId = descRes.streamDescription().shards().get(0).shardId();
                     return single(kinesis.getShardIterator(this.shardIterator(shardId)));
-                })
-                .doOnSuccess(getShardRes -> {
+                }).subscribe(getShardRes -> {
                     startPolling(vertx, ctx, kinesis, originalContext, getShardRes.shardIterator());
                     publishTestRecord(kinesis);
-                })
-                .doOnError(ctx::failNow)
-                .subscribe();
+                }, ctx::failNow);
     }
 
     private CompletableFuture<PutRecordResponse> publishTestRecord(KinesisAsyncClient kinesis) {
@@ -104,6 +101,11 @@ public class VertxKinesisClientSpec extends LocalStackBaseSpec {
         });
     }
 
+
+    /**
+     * Polls the shard
+     * Will complete the test once it has received the record we need to send
+     */
     private void startPolling(Vertx vertx, VertxTestContext ctx, KinesisAsyncClient kinesis, Context originalContext, String shardIteratorId) {
         currentShardIterator = shardIteratorId;
         vertx.setPeriodic(1000L, t -> {
