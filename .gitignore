@@ -3,3 +3,4 @@ out
 .idea
 build
 .vertx
+.DS_Store
