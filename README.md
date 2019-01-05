@@ -5,6 +5,12 @@
 
 This project provides a `VertxNioAsyncHttpClient` and a `VertxExecutor` so that you can use AWS SDK v2 (async) in a Vert.x context.
 
+## Version compatibility matrix
+
+| Project | Vert.x | AWS sdk |
+| ------- | ------ | ------- |
+|  0.0.1  | 3.6.2  | 2.2.0   |
+
 ## For the impatient 
 
 Look at the tests for more info, but here's an example on how to use DynamoClient (local installation) with Vert.x.
