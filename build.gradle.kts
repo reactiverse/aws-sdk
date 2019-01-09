@@ -4,20 +4,30 @@ val junit5Version = "5.3.1"
 val logbackVersion = "1.2.3"
 val integrationOption = "tests.integration"
 
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath("com.jaredsburrows:gradle-license-plugin:0.8.42")
+    }
+}
+
 plugins {
     java
     jacoco
     maven
+    `java-library`
+    id("com.jaredsburrows.license") version("0.8.42")
 }
 
 group = "io.vertx"
 version = "0.0.1-SNAPSHOT"
 
-
 tasks.withType<JavaCompile> {
     sourceCompatibility = JavaVersion.VERSION_1_8.toString()
 }
-
 
 repositories {
     mavenCentral()
