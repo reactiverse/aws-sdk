@@ -22,7 +22,7 @@ plugins {
     id("com.jaredsburrows.license") version("0.8.42")
 }
 
-group = "io.vertx"
+group = "io.reactiverse"
 version = "0.0.1-SNAPSHOT"
 
 tasks.withType<JavaCompile> {
