@@ -44,7 +44,7 @@ public class AsyncHttpClientTest {
   public void setUp() {
     vertx = Vertx.vertx();
     server = vertx.createHttpServer();
-    client = new VertxNioAsyncHttpClient(vertx);
+    client = new VertxNioAsyncHttpClient(vertx.getOrCreateContext());
   }
 
   @AfterEach
