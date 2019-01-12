@@ -20,6 +20,7 @@ plugins {
     maven
     `java-library`
     id("com.jaredsburrows.license") version("0.8.42")
+    id("org.sonarqube") version "2.6"
 }
 
 group = "io.reactiverse"

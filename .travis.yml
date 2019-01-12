@@ -4,7 +4,12 @@ services:
   - docker
 jdk:
   - oraclejdk8
-script: ./gradlew -Dtests.integration=localstack jacocoTestReport
+addons:
+  sonarcloud:
+    organization: "aesteve-github"
+    token:
+      secure: "rfhrzjYXVPt6snwijzObk1RRT+UZ1MgDddTuO0JW8Sua9pKYmCdAPqRFD6TR+5iyisDWReO3laSPK13Tx+FruwxjvJk6gzcw/6L63VBFn0REWVCljQxYExkVcCMibWSfyyPy6fxk6r+2A4mhqHz6Nxeyz7sbS24LwMaWGV2EuN1bAImgAvhX6dJIaKVGsk0DBO9YEk8b8dwhqwmj4DScMmqjlY1zrM7ze+BbMXBRIZ3zOU6hUm09ZNBKEjZ1qqJMkdvFJObqkxHEGvcK8P1aanPtZYWd/eVNI3WKqv6ATsDdD5HftpfXzOS/MoAUvJ7GFQD2sHg/GpFGs8kRpbGWsBAWAGYysYwac0eKIP6dy75bKjvqfP7DuFt9zJAQmJh0/VEMDrXU5XrlSdJ6DEC7APAHs+PQ+MhhGqvPN5m/7dZJPKX7jNvW2Ta19zQJGpEuj7zjSXplevJEre5GcNF281Kz5WYTxkIRJW7QPIS979OzqslatZcOfsEiDXQFErw67HinkVDSefqZpkkMHcmnwQtnjISZUKCRP6RTgvZ9bC2J7IT38ENMkSJ7Wc3gKFeStMTMR2lQiLBypI8FMwDEw8HKlklEKhOuWzmmAbyCEAdCc/lXu0IVLyB2b66uEuEssB9SpJYyvu0I3yNFrb5eDPHuB46tDaCCao46tVSJRZk="
+script: ./gradlew -Dtests.integration=localstack jacocoTestReport sonarqube
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 cache:
