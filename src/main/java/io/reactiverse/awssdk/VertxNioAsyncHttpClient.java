@@ -2,6 +2,7 @@ package io.reactiverse.awssdk;
 
 import io.reactiverse.awssdk.converters.MethodConverter;
 import io.reactiverse.awssdk.reactivestreams.ReadStreamPublisher;
+import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
@@ -23,19 +24,28 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
 
     private final Logger LOG = LoggerFactory.getLogger(VertxNioAsyncHttpClient.class);
 
-    private final Vertx vertx;
+    private final Context context;
 
-    public VertxNioAsyncHttpClient(Vertx vertx) {
-        this.vertx = vertx;
+    public VertxNioAsyncHttpClient(Context context) {
+        this.context = context;
     }
 
     @Override
     public CompletableFuture<Void> execute(AsyncExecuteRequest asyncExecuteRequest) {
+        final CompletableFuture<Void> fut = new CompletableFuture<>();
+        if (Context.isOnEventLoopThread()) {
+            executeOnContext(asyncExecuteRequest, fut);
+        } else {
+            context.runOnContext(v -> executeOnContext(asyncExecuteRequest, fut));
+        }
+        return fut;
+    }
+
+    private void executeOnContext(AsyncExecuteRequest asyncExecuteRequest, CompletableFuture<Void> fut) {
         final SdkHttpRequest request = asyncExecuteRequest.request();
         final SdkAsyncHttpResponseHandler responseHandler = asyncExecuteRequest.responseHandler();
-        final HttpClient client = vertx.createHttpClient(getClientOptions(request));
+        final HttpClient client = context.owner().createHttpClient(getClientOptions(request));
         final String fullPath = request.protocol() + "://" + request.host() + ":" + request.port() + request.encodedPath();
-        final CompletableFuture<Void> fut = new CompletableFuture<>();
 
         final HttpClientRequest vRequest = client.request(MethodConverter.awsToVertx(request.method()), fullPath).setFollowRedirects(true);
         request.headers().forEach((headerName, headerValues) -> {
@@ -61,7 +71,6 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
         } else {
             vRequest.end();
         }
-        return fut;
     }
 
     private HttpClientOptions getClientOptions(SdkHttpRequest request) {
