@@ -70,9 +70,8 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
         return opts;
     }
 
-    /**
-     * Nothing to do on close
-     */
     @Override
-    public void close() {}
+    public void close() {
+       // Nothing to do on close
+    }
 }
