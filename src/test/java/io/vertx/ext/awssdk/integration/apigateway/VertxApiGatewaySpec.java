@@ -70,28 +70,30 @@ public class VertxApiGatewaySpec extends LocalStackBaseSpec {
         // create the REST API
         createRestApi()
                 .flatMap(restAPI -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
+                    assertContext(vertx, originalContext, ctx);
                     apiId = restAPI.id();
                     return getResources();
                 })
                 .flatMap(resources -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
+                    assertContext(vertx, originalContext, ctx);
                     List<Resource> items = resources.items();
-                    assertEquals(1, items.size());
+                    ctx.verify(() -> {
+                        assertEquals(1, items.size());
+                    });
                     parentId = items.get(0).id();
                     return createResource();
                 })
                 .flatMap(createdRes -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
+                    assertContext(vertx, originalContext, ctx);
                     resourceId = createdRes.id();
                     return declareGetMethod();
                 })
                 .flatMap(putMethodRes -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
+                    assertContext(vertx, originalContext, ctx);
                     return declare200ResponseToGet();
                 })
                 .subscribe(res -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
+                    assertContext(vertx, originalContext, ctx);
                     ctx.completeNow();
                 }, ctx::failNow);
     }

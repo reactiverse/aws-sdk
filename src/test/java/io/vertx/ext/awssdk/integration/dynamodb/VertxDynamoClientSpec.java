@@ -57,8 +57,7 @@ public class VertxDynamoClientSpec extends LocalStackBaseSpec {
         final DynamoDbAsyncClient dynamo = dynamo(originalContext);
         single(dynamo.createTable(VertxDynamoClientSpec::createTable))
                 .subscribe(createRes -> {
-                    final Context callbackContext = vertx.getOrCreateContext();
-                    assertEquals(originalContext, callbackContext);
+                    assertContext(vertx, originalContext, ctx);
                     ctx.completeNow();
                 }, ctx::failNow);
     }
@@ -71,10 +70,11 @@ public class VertxDynamoClientSpec extends LocalStackBaseSpec {
         final DynamoDbAsyncClient dynamo = dynamo(originalContext);
         single(dynamo.listTables())
                 .subscribe(listResp -> {
-                    final Context callbackContext = vertx.getOrCreateContext();
-                    assertEquals(originalContext, callbackContext);
-                    assertTrue(listResp.tableNames().contains(TABLE_NAME));
-                    ctx.completeNow();
+                    assertContext(vertx, originalContext, ctx);
+                    ctx.verify(() -> {
+                        assertTrue(listResp.tableNames().contains(TABLE_NAME));
+                        ctx.completeNow();
+                    });
                 }, ctx::failNow);
     }
 
@@ -86,8 +86,7 @@ public class VertxDynamoClientSpec extends LocalStackBaseSpec {
         final DynamoDbAsyncClient dynamo = dynamo(originalContext);
         single(dynamo.putItem(VertxDynamoClientSpec::putItemReq))
                 .subscribe(putRes -> {
-                    final Context callbackContext = vertx.getOrCreateContext();
-                    assertEquals(originalContext, callbackContext);
+                    assertContext(vertx, originalContext, ctx);
                     ctx.completeNow();
                 }, ctx::failNow);
     }
@@ -100,12 +99,13 @@ public class VertxDynamoClientSpec extends LocalStackBaseSpec {
         final DynamoDbAsyncClient dynamo = dynamo(originalContext);
         single(dynamo.getItem(VertxDynamoClientSpec::getItem))
                 .subscribe(getRes -> {
-                    final Context callbackContext = vertx.getOrCreateContext();
-                    assertEquals(originalContext, callbackContext);
+                    assertContext(vertx, originalContext, ctx);
                     final AttributeValue isbn = getRes.item().get(ISBN_FIELD);
-                    assertNotNull(isbn);
-                    assertEquals(isbn.s(), ISBN_VALUE);
-                    ctx.completeNow();
+                    ctx.verify(() -> {
+                        assertNotNull(isbn);
+                        assertEquals(isbn.s(), ISBN_VALUE);
+                        ctx.completeNow();
+                    });
                 }, ctx::failNow);
     }
 

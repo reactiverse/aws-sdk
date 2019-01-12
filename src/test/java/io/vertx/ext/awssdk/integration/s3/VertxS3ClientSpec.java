@@ -65,7 +65,7 @@ public class VertxS3ClientSpec extends LocalStackBaseSpec {
         final S3AsyncClient s3 = s3(originalContext);
         single(s3.createBucket(VertxS3ClientSpec::createBucketReq))
                 .subscribe(createRes -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
+                    assertContext(vertx, originalContext, ctx);
                     ctx.completeNow();
                 }, ctx::failNow);
     }
@@ -77,11 +77,13 @@ public class VertxS3ClientSpec extends LocalStackBaseSpec {
         final S3AsyncClient s3 = s3(originalContext);
         single(s3.listBuckets())
                 .subscribe(bucketList -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
-                    assertEquals(1, bucketList.buckets().size());
-                    final Bucket bucket = bucketList.buckets().get(0);
-                    assertEquals(BUCKET_NAME, bucket.name());
-                    ctx.completeNow();
+                    assertContext(vertx, originalContext, ctx);
+                    ctx.verify(() -> {
+                        assertEquals(1, bucketList.buckets().size());
+                        final Bucket bucket = bucketList.buckets().get(0);
+                        assertEquals(BUCKET_NAME, bucket.name());
+                        ctx.completeNow();
+                    });
                 }, ctx::failNow
         );
     }
@@ -97,9 +99,11 @@ public class VertxS3ClientSpec extends LocalStackBaseSpec {
                     return single(s3.putObject(VertxS3ClientSpec::uploadImgReq, body));
                 })
                 .subscribe(putFileRes -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
-                    assertNotNull(putFileRes.eTag());
-                    ctx.completeNow();
+                    assertContext(vertx, originalContext, ctx);
+                    ctx.verify(() -> {
+                        assertNotNull(putFileRes.eTag());
+                        ctx.completeNow();
+                    });
                 }, ctx::failNow);
     }
 
@@ -110,12 +114,14 @@ public class VertxS3ClientSpec extends LocalStackBaseSpec {
         final S3AsyncClient s3 = s3(originalContext);
         single(s3.listObjects(VertxS3ClientSpec::listObjectsReq))
                 .subscribe(listRes -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
-                    assertEquals(1, listRes.contents().size());
-                    final S3Object myImg = listRes.contents().get(0);
-                    assertNotNull(myImg);
-                    assertEquals(IMG_S3_NAME, myImg.key());
-                    ctx.completeNow();
+                    assertContext(vertx, originalContext, ctx);
+                    ctx.verify(() -> {
+                        assertEquals(1, listRes.contents().size());
+                        final S3Object myImg = listRes.contents().get(0);
+                        assertNotNull(myImg);
+                        assertEquals(IMG_S3_NAME, myImg.key());
+                        ctx.completeNow();
+                    });
                 }, ctx::failNow);
     }
 
@@ -126,10 +132,12 @@ public class VertxS3ClientSpec extends LocalStackBaseSpec {
         final S3AsyncClient s3 = s3(originalContext);
         single(s3.getObject(VertxS3ClientSpec::downloadImgReq, AsyncResponseTransformer.toBytes()))
             .subscribe(getRes -> {
-                assertEquals(originalContext, vertx.getOrCreateContext());
+                assertContext(vertx, originalContext, ctx);
                 byte[] bytes = getRes.asByteArray();
-                assertEquals(fileSize, bytes.length); // We've sent, then received the whole file
-                ctx.completeNow();
+                ctx.verify(() -> {
+                    assertEquals(fileSize, bytes.length); // We've sent, then received the whole file
+                    ctx.completeNow();
+                });
             }, ctx::failNow);
     }
 

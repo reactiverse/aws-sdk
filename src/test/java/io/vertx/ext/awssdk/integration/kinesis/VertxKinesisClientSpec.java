@@ -85,9 +85,11 @@ public class VertxKinesisClientSpec extends LocalStackBaseSpec {
         final KinesisAsyncClient kinesis = kinesis(originalContext);
         single(kinesis.describeStream(this::streamDesc))
                 .flatMap(descRes -> {
+                    assertContext(vertx, originalContext, ctx);
                     String shardId = descRes.streamDescription().shards().get(0).shardId();
                     return single(kinesis.getShardIterator(this.shardIterator(shardId)));
                 }).subscribe(getShardRes -> {
+                    assertContext(vertx, originalContext, ctx);
                     startPolling(vertx, ctx, kinesis, originalContext, getShardRes.shardIterator());
                     publishTestRecord(kinesis);
                 }, ctx::failNow);
@@ -119,8 +121,10 @@ public class VertxKinesisClientSpec extends LocalStackBaseSpec {
                 }
                 final List<Record> recs = getRecRes.records();
                 if (recs.size() > 0) {
-                    assertEquals(1, recs.size());
-                    assertEquals(DATA, recs.get(0).data());
+                    ctx.verify(() -> {
+                        assertEquals(1, recs.size());
+                        assertEquals(DATA, recs.get(0).data());
+                    });
                     if (pollTimer > -1) {
                         vertx.cancelTimer(pollTimer);
                     }

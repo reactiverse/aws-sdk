@@ -59,11 +59,11 @@ public class VertxLambdaClientSpec extends LocalStackBaseSpec {
         lambdaClient = createLambdaClient(originalContext);
         createFunction()
                 .subscribe(createRes -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
-                    assertEquals(LAMBDA_NAME, createRes.functionName());
-                    ctx.completeNow();
-
-
+                    assertContext(vertx, originalContext, ctx);
+                    ctx.verify(() -> {
+                        assertEquals(LAMBDA_NAME, createRes.functionName());
+                        ctx.completeNow();
+                    });
                 }, ctx::failNow);
     }
 
@@ -75,13 +75,15 @@ public class VertxLambdaClientSpec extends LocalStackBaseSpec {
         lambdaClient = createLambdaClient(originalContext);
         invokeFunction()
                 .subscribe(invokeRes -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
-                    assertNull(invokeRes.functionError());
-                    final SdkBytes payload = invokeRes.payload();
-                    assertNotNull(payload);
-                    final JsonObject received = new JsonObject(payload.asUtf8String());
-                    assertEquals(EXPECTED_PAYLOAD, received);
-                    ctx.completeNow();
+                    assertContext(vertx, originalContext, ctx);
+                    ctx.verify(() -> {
+                        assertNull(invokeRes.functionError());
+                        final SdkBytes payload = invokeRes.payload();
+                        assertNotNull(payload);
+                        final JsonObject received = new JsonObject(payload.asUtf8String());
+                        assertEquals(EXPECTED_PAYLOAD, received);
+                        ctx.completeNow();
+                    });
                 }, ctx::failNow);
     }
 

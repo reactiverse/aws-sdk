@@ -4,6 +4,8 @@ import cloud.localstack.docker.LocalstackDocker;
 import io.reactivex.Single;
 import io.reactivex.SingleOnSubscribe;
 import io.vertx.core.Context;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxTestContext;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -14,6 +16,7 @@ import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 
 import static io.vertx.ext.awssdk.VertxSdkClient.withVertx;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class LocalStackBaseSpec {
 
@@ -28,6 +31,12 @@ public abstract class LocalStackBaseSpec {
             return "a";
         }
     };
+
+    protected void assertContext(Vertx vertx, Context context, VertxTestContext testContext) {
+        testContext.verify(() -> {
+            assertEquals(context, vertx.getOrCreateContext());
+        });
+    }
 
     protected static URI s3URI() throws Exception {
         return new URI(LocalstackDocker.INSTANCE.getEndpointS3());
