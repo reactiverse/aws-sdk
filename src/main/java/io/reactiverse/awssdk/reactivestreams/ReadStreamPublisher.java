@@ -31,6 +31,10 @@ public class ReadStreamPublisher<T extends Buffer> implements Publisher<ByteBuff
                 stream.fetch(n);
             }
 
+            /**
+             * Cannot really do anything on the stream
+             * stream.pause() maybe ?
+             */
             @Override
             public void cancel() {}
         });
