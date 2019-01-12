@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 
 public class WriteStreamSubscriber<T extends WriteStream<Buffer>> implements Subscriber<ByteBuffer> {
 
-    protected final static long BUFF_SIZE = 1024;
+    protected static final long BUFF_SIZE = 1024;
 
     protected T stream;
     private Subscription subscription;

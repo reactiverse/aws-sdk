@@ -96,7 +96,8 @@ public class VertxFirehoseClientSpec extends LocalStackBaseSpec {
         // README: DeliveryStream creation can take some time. We have to wait or the Stream to be "ACTIVE" before making actual tests
         boolean streamReady = false;
         while(!streamReady) {
-            Thread.sleep(1000L); // AWS recommendation: polling-frequency (even for DescribeStream) <= 1000ms
+            // AWS recommendation: polling-frequency (even for DescribeStream) <= 1000ms
+            Thread.sleep(1000L); // NOSONAR
             final DeliveryStreamDescription desc = firehoseSync.describeDeliveryStream(ds -> ds.deliveryStreamName(STREAM)).deliveryStreamDescription();
             streamReady = desc.deliveryStreamStatus().equals(DeliveryStreamStatus.ACTIVE);
             assertEquals(STREAM_TYPE, desc.deliveryStreamType());
