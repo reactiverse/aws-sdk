@@ -4,20 +4,31 @@ val junit5Version = "5.4.0-M1"
 val logbackVersion = "1.2.3"
 val integrationOption = "tests.integration"
 
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath("com.jaredsburrows:gradle-license-plugin:0.8.42")
+    }
+}
+
 plugins {
     java
     jacoco
     maven
+    `java-library`
+    id("com.jaredsburrows.license") version("0.8.42")
+    id("org.sonarqube") version "2.6"
 }
 
-group = "io.vertx"
+group = "io.reactiverse"
 version = "0.0.1-SNAPSHOT"
-
 
 tasks.withType<JavaCompile> {
     sourceCompatibility = JavaVersion.VERSION_1_8.toString()
 }
-
 
 repositories {
     mavenCentral()
@@ -55,5 +66,5 @@ tasks.jacocoTestReport {
 }
 
 tasks.withType<Wrapper> {
-    gradleVersion = "5.1"
+    gradleVersion = "5.1.1"
 }
