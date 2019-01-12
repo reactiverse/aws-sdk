@@ -32,7 +32,10 @@ public class ReadStreamPublisher<T extends Buffer> implements Publisher<ByteBuff
             }
 
             @Override
-            public void cancel() {}
+            public void cancel() {
+                // Cannot really do anything on the stream
+                // stream.pause() maybe ?
+            }
         });
         stream.endHandler(v -> {
             s.onComplete();

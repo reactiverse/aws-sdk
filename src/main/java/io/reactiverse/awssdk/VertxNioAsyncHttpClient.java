@@ -1,15 +1,12 @@
 package io.reactiverse.awssdk;
 
 import io.reactiverse.awssdk.converters.MethodConverter;
+import io.reactiverse.awssdk.reactivestreams.HttpClientRequestSubscriber;
 import io.reactiverse.awssdk.reactivestreams.ReadStreamPublisher;
 import io.vertx.core.Context;
-import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
-import io.reactiverse.awssdk.reactivestreams.HttpClientRequestSubscriber;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.http.SdkHttpFullResponse;
 import software.amazon.awssdk.http.SdkHttpRequest;
 import software.amazon.awssdk.http.SdkHttpResponse;
@@ -21,8 +18,6 @@ import software.amazon.awssdk.http.async.SdkHttpContentPublisher;
 import java.util.concurrent.CompletableFuture;
 
 public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
-
-    private final Logger LOG = LoggerFactory.getLogger(VertxNioAsyncHttpClient.class);
 
     private final Context context;
 
@@ -48,9 +43,9 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
         final String fullPath = request.protocol() + "://" + request.host() + ":" + request.port() + request.encodedPath();
 
         final HttpClientRequest vRequest = client.request(MethodConverter.awsToVertx(request.method()), fullPath).setFollowRedirects(true);
-        request.headers().forEach((headerName, headerValues) -> {
-            vRequest.putHeader(headerName, String.join(",", headerValues));
-        });
+        request.headers().forEach((headerName, headerValues) ->
+                vRequest.putHeader(headerName, String.join(",", headerValues))
+        );
         vRequest.exceptionHandler(error -> {
             responseHandler.onError(error);
             fut.completeExceptionally(error);
@@ -84,5 +79,7 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
     }
 
     @Override
-    public void close() {}
+    public void close() {
+       // Nothing to do on close
+    }
 }
