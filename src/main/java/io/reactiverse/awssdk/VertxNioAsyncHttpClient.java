@@ -36,7 +36,7 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
         return fut;
     }
 
-    private void executeOnContext(AsyncExecuteRequest asyncExecuteRequest, CompletableFuture<Void> fut) {
+    void executeOnContext(AsyncExecuteRequest asyncExecuteRequest, CompletableFuture<Void> fut) {
         final SdkHttpRequest request = asyncExecuteRequest.request();
         final SdkAsyncHttpResponseHandler responseHandler = asyncExecuteRequest.responseHandler();
         final HttpClient client = context.owner().createHttpClient(getClientOptions(request));
