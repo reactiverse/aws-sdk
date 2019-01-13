@@ -27,7 +27,7 @@ Under the hood, it's gonna attach the following:
 
 ```java
 return builder
-        .httpClient(new VertxNioAsyncHttpClient(context.owner())) // uses Vert.x's HttpClient to make call to AWS services
+        .httpClient(new VertxNioAsyncHttpClient(context)) // uses Vert.x's HttpClient to make call to AWS services
         .asyncConfiguration(conf -> // tells AWS to execute response callbacks in a Vert.x context
                 conf.advancedOption(SdkAdvancedAsyncClientOption.FUTURE_COMPLETION_EXECUTOR, new VertxExecutor(context))
         );
