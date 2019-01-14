@@ -1,6 +1,6 @@
 # Use AWS SDK 2 with Vert.x
 
-[![Build Status](https://travis-ci.org/reactiverse/aws-sdk.svg?branch=master)](https://travis-ci.org/aesteve/vertx-aws-sdk)
+[![Build Status](https://travis-ci.org/reactiverse/aws-sdk.svg?branch=master)](https://travis-ci.org/reactiverse/aws-sdk.svg?branch=master)
 
 
 This project provides a `VertxNioAsyncHttpClient` and a `VertxExecutor` so that you can use AWS SDK v2 (async) in a Vert.x context.
