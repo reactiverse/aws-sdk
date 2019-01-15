@@ -35,14 +35,15 @@ repositories {
 }
 
 dependencies {
-    compile("io.vertx:vertx-core:$vertxVersion")
-    compile("software.amazon.awssdk:aws-sdk-java:$awsSdkVersion")
+    api("io.vertx:vertx-core:$vertxVersion")
+    api("software.amazon.awssdk:aws-core:$awsSdkVersion")
 
-    testCompile("io.vertx:vertx-junit5:$vertxVersion")
-    testCompile("io.vertx:vertx-rx-java2:$vertxVersion")
-    testCompile("cloud.localstack:localstack-utils:0.1.15")
-    testCompile("ch.qos.logback:logback-classic:$logbackVersion")
-    testCompile("ch.qos.logback:logback-core:$logbackVersion")
+    testImplementation("io.vertx:vertx-junit5:$vertxVersion")
+    testImplementation("io.vertx:vertx-rx-java2:$vertxVersion")
+    testImplementation("cloud.localstack:localstack-utils:0.1.15")
+    testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
+    testImplementation("ch.qos.logback:logback-core:$logbackVersion")
+    testImplementation("software.amazon.awssdk:aws-sdk-java:$awsSdkVersion")
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junit5Version")
 }
