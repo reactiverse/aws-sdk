@@ -4,27 +4,19 @@ val junit5Version = "5.3.1"
 val logbackVersion = "1.2.3"
 val integrationOption = "tests.integration"
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-
-    dependencies {
-        classpath("com.jaredsburrows:gradle-license-plugin:0.8.42")
-    }
-}
 
 plugins {
     java
     jacoco
-    maven
+    `maven-publish`
     `java-library`
-    id("com.jaredsburrows.license") version("0.8.42")
+    signing
     id("org.sonarqube") version "2.6"
 }
 
 group = "io.reactiverse"
 version = "0.0.1-SNAPSHOT"
+val isRelease = !version.toString().endsWith("SNAPSHOT")
 
 tasks.withType<JavaCompile> {
     sourceCompatibility = JavaVersion.VERSION_1_8.toString()
@@ -68,4 +60,65 @@ tasks.jacocoTestReport {
 
 tasks.withType<Wrapper> {
     gradleVersion = "5.1.1"
+}
+
+/**
+ * Maven Publication
+ **/
+if (!project.hasProperty("ossrhUsername")) {
+    extra["ossrhUsername"] = "foo"
+}
+
+if (!project.hasProperty("ossrhPassword")) {
+    extra["ossrhPassword"] = "bar"
+}
+
+tasks.withType<Sign> {
+    onlyIf { isRelease }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+            pom {
+                name.set(project.name)
+                description.set("Reactive AWS SDK")
+                url.set("https://github.com/reactiverse/aws-sdk")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("aesteve")
+                        name.set("Arnaud Esteve")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git@github.com:reactiverse/aws-sdk.git")
+                    developerConnection.set("scm:git:git@github.com:reactiverse/aws-sdk.git")
+                    url.set("https://github.com/reactiverse/aws-sdk")
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "SonatypeOSS"
+            url = if (isRelease) {
+                uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+            } else {
+                uri("https://oss.sonatype.org/content/repositories/snapshots/")
+            }
+            credentials {
+                val ossrhUsername: String by project
+                val ossrhPassword: String by project
+                username = ossrhUsername
+                password = ossrhPassword
+            }
+        }
+    }
 }
