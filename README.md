@@ -1,6 +1,6 @@
 # Use AWS SDK 2 with Vert.x
 
-[![Build Status](https://travis-ci.org/aesteve/vertx-aws-sdk.svg?branch=master)](https://travis-ci.org/aesteve/vertx-aws-sdk)
+[![Build Status](https://travis-ci.org/reactiverse/aws-sdk.svg?branch=master)](https://travis-ci.org/reactiverse/aws-sdk)
 
 
 This project provides a `VertxNioAsyncHttpClient` and a `VertxExecutor` so that you can use AWS SDK v2 (async) in a Vert.x context.
@@ -9,7 +9,7 @@ This project provides a `VertxNioAsyncHttpClient` and a `VertxExecutor` so that 
 
 | Project | Vert.x | AWS sdk |
 | ------- | ------ | ------- |
-|  0.0.1  | 3.6.2  | 2.2.0   |
+|  0.0.1  | 3.6.2  | 2.3.7   |
 
 ## For the impatient 
 
@@ -27,7 +27,7 @@ Under the hood, it's gonna attach the following:
 
 ```java
 return builder
-        .httpClient(new VertxNioAsyncHttpClient(context.owner())) // uses Vert.x's HttpClient to make call to AWS services
+        .httpClient(new VertxNioAsyncHttpClient(context)) // uses Vert.x's HttpClient to make call to AWS services
         .asyncConfiguration(conf -> // tells AWS to execute response callbacks in a Vert.x context
                 conf.advancedOption(SdkAdvancedAsyncClientOption.FUTURE_COMPLETION_EXECUTOR, new VertxExecutor(context))
         );

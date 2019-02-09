@@ -9,7 +9,7 @@ public interface VertxSdkClient {
 
     static<C extends SdkClient, B extends AwsAsyncClientBuilder<B, C>> B withVertx(B builder, Context context) {
         return builder
-                .httpClient(new VertxNioAsyncHttpClient(context.owner()))
+                .httpClient(new VertxNioAsyncHttpClient(context))
                 .asyncConfiguration(conf ->
                         conf.advancedOption(SdkAdvancedAsyncClientOption.FUTURE_COMPLETION_EXECUTOR, new VertxExecutor(context))
                 );
