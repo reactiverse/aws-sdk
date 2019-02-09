@@ -59,6 +59,9 @@ public class VertxApiGatewaySpec extends LocalStackBaseSpec {
     private String parentId;
     private String resourceId;
 
+    // README: see below for the full test
+    // But: https://github.com/localstack/localstack/issues/1030
+    // For now we're just testing creation requests, but not the actual routing one, because localstack doesn't allow it
     @Test
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
     public void testRequestThroughGateway(Vertx vertx, VertxTestContext ctx) throws Exception {
@@ -67,50 +70,32 @@ public class VertxApiGatewaySpec extends LocalStackBaseSpec {
         // create the REST API
         createRestApi()
                 .flatMap(restAPI -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
+                    assertContext(vertx, originalContext, ctx);
                     apiId = restAPI.id();
                     return getResources();
                 })
                 .flatMap(resources -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
+                    assertContext(vertx, originalContext, ctx);
                     List<Resource> items = resources.items();
-                    assertEquals(1, items.size());
+                    ctx.verify(() -> {
+                        assertEquals(1, items.size());
+                    });
                     parentId = items.get(0).id();
                     return createResource();
                 })
                 .flatMap(createdRes -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
+                    assertContext(vertx, originalContext, ctx);
                     resourceId = createdRes.id();
                     return declareGetMethod();
                 })
                 .flatMap(putMethodRes -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
+                    assertContext(vertx, originalContext, ctx);
                     return declare200ResponseToGet();
                 })
-                .doOnSuccess(res ->
-                        ctx.completeNow()
-                ) // FIXME: see below for the full test but: https://github.com/localstack/localstack/issues/1030
-                /*
-                .flatMap(res -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
-                    return attachRemoteEndpoint();
-                })
-                .flatMap(res -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
-                    return mapRemoteResponse();
-                })
-                .flatMap(res -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
-                    return makeIntegrationTest();
-                })
-                .doOnSuccess(integrationTest -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
-                    assertEquals(integrationTest.body(), MOCK_RESPONSE);
+                .subscribe(res -> {
+                    assertContext(vertx, originalContext, ctx);
                     ctx.completeNow();
-                })
-                */
-                .doOnError(ctx::failNow)
-                .subscribe();
+                }, ctx::failNow);
     }
 
     private Single<CreateRestApiResponse> createRestApi() {
@@ -200,5 +185,25 @@ public class VertxApiGatewaySpec extends LocalStackBaseSpec {
                 .endpointOverride(gatewayURI);
         gatewayClient = VertxSdkClient.withVertx(builder, context).build();
     }
+
+    /*
+    .flatMap(res -> {
+        assertEquals(originalContext, vertx.getOrCreateContext());
+        return attachRemoteEndpoint();
+    })
+    .flatMap(res -> {
+        assertEquals(originalContext, vertx.getOrCreateContext());
+        return mapRemoteResponse();
+    })
+    .flatMap(res -> {
+        assertEquals(originalContext, vertx.getOrCreateContext());
+        return makeIntegrationTest();
+    })
+    .doOnSuccess(integrationTest -> {
+        assertEquals(originalContext, vertx.getOrCreateContext());
+        assertEquals(integrationTest.body(), MOCK_RESPONSE);
+        ctx.completeNow();
+    })
+    */
 
 }

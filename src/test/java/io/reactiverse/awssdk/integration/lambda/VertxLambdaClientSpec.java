@@ -13,7 +13,10 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.extension.ExtendWith;
 import software.amazon.awssdk.core.SdkBytes;
@@ -37,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 @LocalstackDockerProperties(services = { "lambda" })
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class VertxLambdaClientSpec extends LocalStackBaseSpec {
 
     private static final String LAMBDA_NAME = "My-Vertx-Lambda";
@@ -49,26 +53,38 @@ public class VertxLambdaClientSpec extends LocalStackBaseSpec {
 
     @Test
     @Timeout(value = 15, timeUnit = TimeUnit.SECONDS)
-    public void testCreateThenInvokeLambda(Vertx vertx, VertxTestContext ctx) throws Exception {
+    @Order(1)
+    public void createLambda(Vertx vertx, VertxTestContext ctx) throws Exception {
         final Context originalContext = vertx.getOrCreateContext();
         lambdaClient = createLambdaClient(originalContext);
         createFunction()
-                .flatMap(createRes -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
-                    assertEquals(LAMBDA_NAME, createRes.functionName());
-                    return invokeFunction();
-                })
-                .doOnSuccess(invokeRes -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
-                    assertNull(invokeRes.functionError());
-                    final SdkBytes payload = invokeRes.payload();
-                    assertNotNull(payload);
-                    final JsonObject received = new JsonObject(payload.asUtf8String());
-                    assertEquals(EXPECTED_PAYLOAD, received);
-                    ctx.completeNow();
-                })
-                .doOnError(ctx::failNow)
-                .subscribe();
+                .subscribe(createRes -> {
+                    assertContext(vertx, originalContext, ctx);
+                    ctx.verify(() -> {
+                        assertEquals(LAMBDA_NAME, createRes.functionName());
+                        ctx.completeNow();
+                    });
+                }, ctx::failNow);
+    }
+
+    @Test
+    @Timeout(value = 15, timeUnit = TimeUnit.SECONDS)
+    @Order(2)
+    public void invokeLambda(Vertx vertx, VertxTestContext ctx) throws Exception {
+        final Context originalContext = vertx.getOrCreateContext();
+        lambdaClient = createLambdaClient(originalContext);
+        invokeFunction()
+                .subscribe(invokeRes -> {
+                    assertContext(vertx, originalContext, ctx);
+                    ctx.verify(() -> {
+                        assertNull(invokeRes.functionError());
+                        final SdkBytes payload = invokeRes.payload();
+                        assertNotNull(payload);
+                        final JsonObject received = new JsonObject(payload.asUtf8String());
+                        assertEquals(EXPECTED_PAYLOAD, received);
+                        ctx.completeNow();
+                    });
+                }, ctx::failNow);
     }
 
     private Single<CreateFunctionResponse> createFunction() {

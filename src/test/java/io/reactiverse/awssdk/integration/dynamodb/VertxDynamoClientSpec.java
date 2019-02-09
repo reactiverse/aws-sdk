@@ -10,7 +10,10 @@ import io.vertx.core.Vertx;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.extension.ExtendWith;
 import software.amazon.awssdk.regions.Region;
@@ -35,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(LocalstackDockerExtension.class)
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
 @LocalstackDockerProperties(services = { "dynamodb" })
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class VertxDynamoClientSpec extends LocalStackBaseSpec {
 
     private final static String TABLE_NAME = "BOOKS";
@@ -47,34 +51,62 @@ public class VertxDynamoClientSpec extends LocalStackBaseSpec {
 
     @Test
     @Timeout(value = 15, timeUnit = TimeUnit.SECONDS)
-    public void createTableThenInsertThenGet(Vertx vertx, VertxTestContext ctx) throws Exception {
+    @Order(1)
+    public void createTable(Vertx vertx, VertxTestContext ctx) throws Exception {
         final Context originalContext = vertx.getOrCreateContext();
         final DynamoDbAsyncClient dynamo = dynamo(originalContext);
         single(dynamo.createTable(VertxDynamoClientSpec::createTable))
-                .flatMap(createRes -> {
-                    final Context callbackContext = vertx.getOrCreateContext();
-                    assertEquals(originalContext, callbackContext);
-                    return single(dynamo.listTables());
-                })
-                .flatMap(listResp -> {
-                    final Context callbackContext = vertx.getOrCreateContext();
-                    assertEquals(originalContext, callbackContext);
-                    assertTrue(listResp.tableNames().contains(TABLE_NAME));
-                    return single(dynamo.putItem(VertxDynamoClientSpec::putItem));
-                }).flatMap(putRes -> {
-                    final Context callbackContext = vertx.getOrCreateContext();
-                    assertEquals(originalContext, callbackContext);
-                    return single(dynamo.getItem(VertxDynamoClientSpec::getItem));
-                }).doOnSuccess(getRes -> {
-                    final Context callbackContext = vertx.getOrCreateContext();
-                    assertEquals(originalContext, callbackContext);
-                    final AttributeValue isbn = getRes.item().get(ISBN_FIELD);
-                    assertNotNull(isbn);
-                    assertEquals(isbn.s(), ISBN_VALUE);
+                .subscribe(createRes -> {
+                    assertContext(vertx, originalContext, ctx);
                     ctx.completeNow();
-                })
-                .doOnError(ctx::failNow)
-                .subscribe();
+                }, ctx::failNow);
+    }
+
+    @Test
+    @Timeout(value = 15, timeUnit = TimeUnit.SECONDS)
+    @Order(2)
+    public void listTables(Vertx vertx, VertxTestContext ctx) throws Exception {
+        final Context originalContext = vertx.getOrCreateContext();
+        final DynamoDbAsyncClient dynamo = dynamo(originalContext);
+        single(dynamo.listTables())
+                .subscribe(listResp -> {
+                    assertContext(vertx, originalContext, ctx);
+                    ctx.verify(() -> {
+                        assertTrue(listResp.tableNames().contains(TABLE_NAME));
+                        ctx.completeNow();
+                    });
+                }, ctx::failNow);
+    }
+
+    @Test
+    @Timeout(value = 15, timeUnit = TimeUnit.SECONDS)
+    @Order(3)
+    public void addItemToTable(Vertx vertx, VertxTestContext ctx) throws Exception {
+        final Context originalContext = vertx.getOrCreateContext();
+        final DynamoDbAsyncClient dynamo = dynamo(originalContext);
+        single(dynamo.putItem(VertxDynamoClientSpec::putItemReq))
+                .subscribe(putRes -> {
+                    assertContext(vertx, originalContext, ctx);
+                    ctx.completeNow();
+                }, ctx::failNow);
+    }
+
+    @Test
+    @Timeout(value = 15, timeUnit = TimeUnit.SECONDS)
+    @Order(4)
+    public void getItemFromTable(Vertx vertx, VertxTestContext ctx) throws Exception {
+        final Context originalContext = vertx.getOrCreateContext();
+        final DynamoDbAsyncClient dynamo = dynamo(originalContext);
+        single(dynamo.getItem(VertxDynamoClientSpec::getItem))
+                .subscribe(getRes -> {
+                    assertContext(vertx, originalContext, ctx);
+                    final AttributeValue isbn = getRes.item().get(ISBN_FIELD);
+                    ctx.verify(() -> {
+                        assertNotNull(isbn);
+                        assertEquals(isbn.s(), ISBN_VALUE);
+                        ctx.completeNow();
+                    });
+                }, ctx::failNow);
     }
 
     private static CreateTableRequest.Builder createTable(CreateTableRequest.Builder builder) {
@@ -92,7 +124,7 @@ public class VertxDynamoClientSpec extends LocalStackBaseSpec {
                 );
     }
 
-    private static PutItemRequest.Builder putItem(PutItemRequest.Builder pib) {
+    private static PutItemRequest.Builder putItemReq(PutItemRequest.Builder pib) {
         return pib.tableName(TABLE_NAME)
                 .item(ITEM);
     }

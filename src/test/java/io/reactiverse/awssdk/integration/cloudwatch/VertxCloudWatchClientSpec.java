@@ -69,9 +69,11 @@ public class VertxCloudWatchClientSpec extends LocalStackBaseSpec {
         // TODO: create an alarm and send metric data to trigger alarm ?
         single(cloudwatch.putDashboard(VertxCloudWatchClientSpec::createDashboard))
                 .doOnSuccess(createRes -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
-                    assertTrue(createRes.dashboardValidationMessages().isEmpty());
-                    ctx.completeNow();
+                    assertContext(vertx, originalContext, ctx);
+                    ctx.verify(() -> {
+                        assertTrue(createRes.dashboardValidationMessages().isEmpty());
+                        ctx.completeNow();
+                    });
                 })
                 .doOnError(ctx::failNow)
                 .subscribe();

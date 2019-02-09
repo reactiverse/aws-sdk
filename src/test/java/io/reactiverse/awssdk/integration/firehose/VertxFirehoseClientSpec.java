@@ -114,17 +114,17 @@ public class VertxFirehoseClientSpec extends LocalStackBaseSpec {
         publishTestData()
                 .delay(5, TimeUnit.SECONDS, RxHelper.scheduler(vertx)) // Let localstack deal with Firehose to S3
                 .flatMap(pubRes -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
+                    assertContext(vertx, originalContext, ctx);
                     return lists3Files();
                 })
-                .doOnSuccess(listRes -> {
-                    assertEquals(originalContext, vertx.getOrCreateContext());
+                .subscribe(listRes -> {
+                    assertContext(vertx, originalContext, ctx);
                     final List<S3Object> files = listRes.contents();
-                    assertEquals(1, files.size());
-                    ctx.completeNow();
-                })
-                .doOnError(ctx::failNow)
-                .subscribe();
+                    ctx.verify(() -> {
+                        assertEquals(1, files.size());
+                        ctx.completeNow();
+                    });
+                }, ctx::failNow);
     }
 
     private Single<ListObjectsResponse> lists3Files() {
