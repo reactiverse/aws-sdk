@@ -45,7 +45,7 @@ dependencies {
     testImplementation("ch.qos.logback:logback-core:$logbackVersion")
     testImplementation("software.amazon.awssdk:aws-sdk-java:$awsSdkVersion")
 
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junit5Version")
+    testCompile("org.junit.jupiter:junit-jupiter-engine:$junit5Version")
 }
 
 tasks.withType<Test> {
