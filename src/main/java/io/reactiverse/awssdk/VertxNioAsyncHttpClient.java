@@ -4,9 +4,12 @@ import io.reactiverse.awssdk.converters.MethodConverter;
 import io.reactiverse.awssdk.reactivestreams.HttpClientRequestSubscriber;
 import io.reactiverse.awssdk.reactivestreams.ReadStreamPublisher;
 import io.vertx.core.Context;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.RequestOptions;
 import software.amazon.awssdk.http.SdkHttpFullResponse;
 import software.amazon.awssdk.http.SdkHttpRequest;
 import software.amazon.awssdk.http.SdkHttpResponse;
@@ -20,9 +23,18 @@ import java.util.concurrent.CompletableFuture;
 public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
 
     private final Context context;
+    private final HttpClient client;
 
     public VertxNioAsyncHttpClient(Context context) {
         this.context = context;
+        this.client = createVertxHttpClient(context.owner());
+    }
+
+    private static HttpClient createVertxHttpClient(Vertx vertx) {
+        HttpClientOptions options = new HttpClientOptions()
+            .setSsl(true)
+            .setKeepAlive(true);
+        return vertx.createHttpClient(options);
     }
 
     @Override
@@ -39,10 +51,10 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
     void executeOnContext(AsyncExecuteRequest asyncExecuteRequest, CompletableFuture<Void> fut) {
         final SdkHttpRequest request = asyncExecuteRequest.request();
         final SdkAsyncHttpResponseHandler responseHandler = asyncExecuteRequest.responseHandler();
-        final HttpClient client = context.owner().createHttpClient(getClientOptions(request));
-        final String fullPath = request.protocol() + "://" + request.host() + ":" + request.port() + request.encodedPath();
 
-        final HttpClientRequest vRequest = client.request(MethodConverter.awsToVertx(request.method()), fullPath).setFollowRedirects(true);
+        final HttpMethod method = MethodConverter.awsToVertx(request.method());
+        final RequestOptions options = getRequestOptions(request);
+        final HttpClientRequest vRequest = client.request(method, options).setFollowRedirects(true);
         request.headers().forEach((headerName, headerValues) ->
                 vRequest.putHeader(headerName, String.join(",", headerValues))
         );
@@ -68,18 +80,16 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
         }
     }
 
-    private HttpClientOptions getClientOptions(SdkHttpRequest request) {
-        HttpClientOptions opts = new HttpClientOptions()
-                .setDefaultHost(request.host())
-                .setDefaultPort(request.port());
-        if ("https".equals(request.protocol())) {
-            opts.setSsl(true);
-        }
-        return opts;
+    private static RequestOptions getRequestOptions(SdkHttpRequest request) {
+        return new RequestOptions()
+            .setHost(request.host())
+            .setPort(request.port())
+            .setURI(request.encodedPath())
+            .setSsl("https".equals(request.protocol()));
     }
 
     @Override
     public void close() {
-       // Nothing to do on close
+        client.close();
     }
 }
