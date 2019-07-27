@@ -13,6 +13,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -54,6 +55,7 @@ public class VertxLambdaClientSpec extends LocalStackBaseSpec {
     @Test
     @Timeout(value = 15, timeUnit = TimeUnit.SECONDS)
     @Order(1)
+    @Disabled // localstack broke lambda support in its latest version...
     public void createLambda(Vertx vertx, VertxTestContext ctx) throws Exception {
         final Context originalContext = vertx.getOrCreateContext();
         lambdaClient = createLambdaClient(originalContext);
@@ -70,6 +72,7 @@ public class VertxLambdaClientSpec extends LocalStackBaseSpec {
     @Test
     @Timeout(value = 15, timeUnit = TimeUnit.SECONDS)
     @Order(2)
+    @Disabled // localstack broke lambda support in its latest version...
     public void invokeLambda(Vertx vertx, VertxTestContext ctx) throws Exception {
         final Context originalContext = vertx.getOrCreateContext();
         lambdaClient = createLambdaClient(originalContext);
