@@ -42,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Disabled // localstack broke lambda support in its latest version...
 public class VertxLambdaClientSpec extends LocalStackBaseSpec {
 
     private static final String LAMBDA_NAME = "My-Vertx-Lambda";
@@ -55,7 +56,6 @@ public class VertxLambdaClientSpec extends LocalStackBaseSpec {
     @Test
     @Timeout(value = 15, timeUnit = TimeUnit.SECONDS)
     @Order(1)
-    @Disabled // localstack broke lambda support in its latest version...
     public void createLambda(Vertx vertx, VertxTestContext ctx) throws Exception {
         final Context originalContext = vertx.getOrCreateContext();
         lambdaClient = createLambdaClient(originalContext);
@@ -72,7 +72,6 @@ public class VertxLambdaClientSpec extends LocalStackBaseSpec {
     @Test
     @Timeout(value = 15, timeUnit = TimeUnit.SECONDS)
     @Order(2)
-    @Disabled // localstack broke lambda support in its latest version...
     public void invokeLambda(Vertx vertx, VertxTestContext ctx) throws Exception {
         final Context originalContext = vertx.getOrCreateContext();
         lambdaClient = createLambdaClient(originalContext);
