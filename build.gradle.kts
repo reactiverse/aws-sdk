@@ -51,6 +51,7 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
     systemProperties[integrationOption] = System.getProperty(integrationOption)
+    maxParallelForks = 1
 }
 
 jacoco {
