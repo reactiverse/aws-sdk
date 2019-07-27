@@ -41,7 +41,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@Disabled("Unfortunately causing docker issues")
 class VertxS3ClientSpec extends LocalStackBaseSpec {
 
     private final static String BUCKET_NAME = "my-vertx-bucket";
