@@ -13,11 +13,11 @@ Given `context` is a Vert.x `Context` object (either obtained by `vertx.getOrCre
 a `AbstractVerticle.init` method), you can use `withVertx` utility method to create a client:
 
 ```java
-final DynamoDbAsyncClient dynamo = VertxSdkClient.withVertx( // use the provided utility method
-        DynamoDbAsyncClient.builder() // with the traditional AwsAsyncClientBuilder you're used to
-            .region(Region.EU_WEST_1) // that you'll confiugure as usual
-        , context) // and provide a Vert.x context (the one from within your Verticle for example)
-        .build(); // then build it => you'll have a Vert.x compatible AwsAsyncClient
+DynamoDbAsyncClient dynamo = VertxSdkClient.withVertx( // use the provided utility method
+    DynamoDbAsyncClient.builder() // with the traditional AwsAsyncClientBuilder you're used to
+        .region(Region.EU_WEST_1) // that you'll confiugure as usual
+    , context) // and provide a Vert.x context (the one from within your Verticle for example)
+    .build(); // then build it => you'll have a Vert.x compatible AwsAsyncClient
 ```
 
 Under the hood, it's gonna attach the following:
