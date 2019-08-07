@@ -48,3 +48,15 @@ They will download docker images from the docker hub, run the appropriate servic
 the code against this local docker container.
 
 They'll only be executed if the system property `tests.integration` is set to `localstack`. They'll be ignored otherwise.
+
+## Documentation
+
+Documentation is `docs/README.md` and visible at https://github.com/reactiverse/aws-sdk/tree/master/docs or https://reactiverse.io/aws-sdk/
+
+Javadoc can be produced (with Java 11 otherwise it does not link Vert.x API docs)
+
+```
+> ./gradlew javadocToDocsFolder
+```
+
+This will update the docs/javadoc with latest javadocs
