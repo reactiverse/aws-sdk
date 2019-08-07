@@ -12,7 +12,7 @@ This project provides a `VertxNioAsyncHttpClient` and a `VertxExecutor` so that 
 
 ## Documentation
 
-See [this page](docs/README.md)
+See [this page](https://reactiverse.io/aws-sdk)
 
 ## Motivations
 
