@@ -79,7 +79,7 @@ tasks {
         into("docs/javadoc")
     }
 
-    named("assemble") {
+    assemble {
         dependsOn("javadocToDocsFolder")
     }
 
