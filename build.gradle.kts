@@ -23,6 +23,17 @@ repositories {
 group = "io.reactiverse"
 version = "0.0.1-SNAPSHOT"
 
+project.extra["isReleaseVersion"] = !version.toString().endsWith("SNAPSHOT")
+
+if (!project.hasProperty("ossrhUsername")) {
+    logger.warn("No ossrhUsername property defined in your Gradle properties file to deploy to Maven Central, using 'foo' to make the build pass")
+    project.extra["ossrhUsername"] = "foo"
+}
+if (!project.hasProperty("ossrhPassword")) {
+    logger.warn("No ossrhPassword property defined in your Gradle properties file to deploy to Maven Central, using 'bar' to make the build pass")
+    project.extra["ossrhPassword"] = "bar"
+}
+
 dependencies {
     api("io.vertx:vertx-core:$vertxVersion")
     api("software.amazon.awssdk:aws-core:$awsSdkVersion")
@@ -63,8 +74,86 @@ tasks {
         maxParallelForks = 1
     }
 
+    create<Jar>("sourcesJar") {
+        from(sourceSets.main.get().allJava)
+        archiveClassifier.set("sources")
+    }
+
+    create<Jar>("javadocJar") {
+        from(javadoc)
+        archiveClassifier.set("javadoc")
+    }
+
+    javadoc {
+        if (JavaVersion.current().isJava9Compatible) {
+            (options as StandardJavadocDocletOptions).addBooleanOption("html5", true)
+        }
+    }
+
+    withType<Sign> {
+        onlyIf { project.extra["isReleaseVersion"] as Boolean }
+    }
+
     withType<Wrapper> {
         gradleVersion = "5.4.1"
     }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+            artifact(tasks["sourcesJar"])
+            artifact(tasks["javadocJar"])
+            pom {
+                name.set(project.name)
+                description.set("Reactiverse AWS SDK 2 with Vert.x")
+                url.set("https://github.com/reactiverse/aws-sdk")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("aesteve")
+                        name.set("Arnaud Esteve")
+                        email.set("arnaud.esteve@gmail.com")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git@github.com:reactiverse/aws-sdk.git")
+                    developerConnection.set("scm:git:git@github.com:reactiverse/aws-sdk.git")
+                    url.set("https://github.com/reactiverse/aws-sdk")
+                }
+            }
+        }
+    }
+    repositories {
+        // To locally check out the poms
+        maven {
+            val releasesRepoUrl = uri("$buildDir/repos/releases")
+            val snapshotsRepoUrl = uri("$buildDir/repos/snapshots")
+            name = "BuildDir"
+            url = if (project.extra["isReleaseVersion"] as Boolean) releasesRepoUrl else snapshotsRepoUrl
+        }
+        maven {
+            val releasesRepoUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+            val snapshotsRepoUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+            name = "SonatypeOSS"
+            url = if (project.extra["isReleaseVersion"] as Boolean) releasesRepoUrl else snapshotsRepoUrl
+            credentials {
+                val ossrhUsername: String by project
+                val ossrhPassword: String by project
+                username = ossrhUsername
+                password = ossrhPassword
+            }
+        }
+    }
+}
+
+signing {
+    sign(publishing.publications["mavenJava"])
 }
 
