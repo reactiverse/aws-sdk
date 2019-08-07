@@ -3,6 +3,12 @@
 This project provides a `VertxNioAsyncHttpClient` and a `VertxExecutor` so that you can use AWS SDK v2 (async)
 in a Vert.x application.
 
+## Javadoc
+
+The [Javadoc](./javadoc/index.html).
+
+## Intro
+
 Given `context` is a Vert.x `Context` object (either obtained by `vertx.getOrCreateContext()` or from
 a `AbstractVerticle.init` method), you can use `withVertx` utility method to create a client:
 
