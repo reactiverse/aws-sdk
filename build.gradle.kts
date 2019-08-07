@@ -74,6 +74,15 @@ tasks {
         maxParallelForks = 1
     }
 
+    create<Copy>("javadocToDocsFolder") {
+        from(javadoc)
+        into("docs/javadoc")
+    }
+
+    named("assemble") {
+        dependsOn("javadocToDocsFolder")
+    }
+
     create<Jar>("sourcesJar") {
         from(sourceSets.main.get().allJava)
         archiveClassifier.set("sources")
