@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
-@LocalstackDockerProperties(services = { "s3" })
+@LocalstackDockerProperties(services = { "s3" }, imageTag = "0.10.2")
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
