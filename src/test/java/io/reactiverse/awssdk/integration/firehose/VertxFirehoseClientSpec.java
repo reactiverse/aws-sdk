@@ -52,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
-@LocalstackDockerProperties(services = { "firehose", "s3" })
+@LocalstackDockerProperties(services = { "firehose", "s3" }, imageTag = "0.10.2")
 public class VertxFirehoseClientSpec extends LocalStackBaseSpec {
 
     private final static String STREAM = "My-Vertx-Firehose-Stream";

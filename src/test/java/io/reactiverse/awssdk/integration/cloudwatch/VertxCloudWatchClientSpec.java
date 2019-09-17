@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
-@LocalstackDockerProperties(services = { "cloudwatch" })
+@LocalstackDockerProperties(services = { "cloudwatch" }, imageTag = "0.10.2")
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
 public class VertxCloudWatchClientSpec extends LocalStackBaseSpec {

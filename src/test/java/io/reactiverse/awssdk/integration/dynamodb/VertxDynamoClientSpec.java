@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
-@LocalstackDockerProperties(services = { "dynamodb" })
+@LocalstackDockerProperties(services = { "dynamodb" }, imageTag = "0.10.2")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class VertxDynamoClientSpec extends LocalStackBaseSpec {
 
