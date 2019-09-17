@@ -5,11 +5,7 @@ import io.reactiverse.awssdk.reactivestreams.HttpClientRequestSubscriber;
 import io.reactiverse.awssdk.reactivestreams.ReadStreamPublisher;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.RequestOptions;
+import io.vertx.core.http.*;
 import software.amazon.awssdk.http.SdkHttpFullResponse;
 import software.amazon.awssdk.http.SdkHttpRequest;
 import software.amazon.awssdk.http.SdkHttpResponse;
@@ -58,6 +54,7 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
         request.headers().forEach((headerName, headerValues) ->
                 vRequest.putHeader(headerName, String.join(",", headerValues))
         );
+        vRequest.putHeader(HttpHeaders.CONNECTION, HttpHeaders.KEEP_ALIVE);
         vRequest.exceptionHandler(error -> {
             responseHandler.onError(error);
             fut.completeExceptionally(error);
