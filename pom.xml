@@ -27,7 +27,7 @@
 
   <groupId>io.reactiverse</groupId>
   <artifactId>vertx-aws-sdk</artifactId>
-  <version>0.0.2</version>
+  <version>0.0.3-SNAPSHOT</version>
 
   <name>AWS SDK for Vert.x</name>
 
