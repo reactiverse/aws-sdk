@@ -8,7 +8,7 @@ This project provides a `VertxNioAsyncHttpClient` and a `VertxExecutor` so that 
 
 | Project | Vert.x | AWS sdk |
 | ------- | ------ | ------- |
-|  0.0.3  | 3.8.1  | 2.7.8   |
+|  0.3.0  | 3.8.1  | 2.7.8   |
 
 ## Documentation
 
