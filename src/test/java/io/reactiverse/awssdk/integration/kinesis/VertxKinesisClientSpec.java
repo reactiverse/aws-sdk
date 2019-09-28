@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
-@LocalstackDockerProperties(services = { "kinesis" })
+@LocalstackDockerProperties(services = { "kinesis" }, imageTag = "0.10.2")
 public class VertxKinesisClientSpec extends LocalStackBaseSpec {
 
     private final static String STREAM = "my-awesome-stream";

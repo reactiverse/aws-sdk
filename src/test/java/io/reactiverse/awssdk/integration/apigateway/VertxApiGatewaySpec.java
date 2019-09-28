@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
-@LocalstackDockerProperties(services = { "apigateway" })
+@LocalstackDockerProperties(services = { "apigateway" }, imageTag = "0.10.2")
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
 public class VertxApiGatewaySpec extends LocalStackBaseSpec {
