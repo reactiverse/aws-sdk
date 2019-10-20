@@ -2,11 +2,14 @@ package io.reactiverse.awssdk.integration.s3;
 
 import cloud.localstack.docker.LocalstackDockerExtension;
 import cloud.localstack.docker.annotation.LocalstackDockerProperties;
+import io.reactiverse.awssdk.converters.VertxAsyncResponseTransformer;
 import io.reactiverse.awssdk.integration.LocalStackBaseSpec;
 import io.reactiverse.awssdk.reactivestreams.ReadStreamPublisher;
 import io.reactivex.Single;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.eventbus.MessageProducer;
 import io.vertx.core.file.OpenOptions;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
@@ -140,6 +143,23 @@ public class VertxS3ClientSpec extends LocalStackBaseSpec {
                 });
             }, ctx::failNow);
     }
+
+    @Test
+    @Order(6)
+    public void downloadImageFromBucketToPump(Vertx vertx, VertxTestContext ctx) throws Exception {
+        final Context originalContext = vertx.getOrCreateContext();
+        final S3AsyncClient s3 = s3(originalContext);
+        final String ebAddress = "s3-forwarded";
+        final MessageProducer<Buffer> producer = vertx.eventBus().sender(ebAddress);
+        final Buffer received = Buffer.buffer();
+        vertx.eventBus().<Buffer>consumer(ebAddress, msg -> {
+            received.appendBuffer(msg.body());
+            if (received.length() == fileSize) ctx.completeNow();
+        });
+        single(s3.getObject(VertxS3ClientSpec::downloadImgReq, new VertxAsyncResponseTransformer<>(producer)))
+                .subscribe(getRes -> {}, ctx::failNow);
+    }
+
 
     /* Utility methods */
     private static Single<AsyncFile> readFileFromDisk(Vertx vertx) {
