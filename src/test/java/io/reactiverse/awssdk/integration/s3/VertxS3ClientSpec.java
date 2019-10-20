@@ -29,14 +29,17 @@ import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.model.Bucket;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
 @LocalstackDockerProperties(services = { "s3" }, imageTag = "0.10.2")
@@ -152,11 +155,17 @@ public class VertxS3ClientSpec extends LocalStackBaseSpec {
         final String ebAddress = "s3-forwarded";
         final MessageProducer<Buffer> producer = vertx.eventBus().sender(ebAddress);
         final Buffer received = Buffer.buffer();
+        AtomicBoolean handlerCalled = new AtomicBoolean(false);
+        VertxAsyncResponseTransformer<GetObjectResponse> transformer = new VertxAsyncResponseTransformer<>(producer);
+        transformer.setResponseHandler(resp -> {
+            handlerCalled.set(true);
+        });
         vertx.eventBus().<Buffer>consumer(ebAddress, msg -> {
+            assertTrue(handlerCalled.get(), "Response handler should have been called before first bytes are received");
             received.appendBuffer(msg.body());
             if (received.length() == fileSize) ctx.completeNow();
         });
-        single(s3.getObject(VertxS3ClientSpec::downloadImgReq, new VertxAsyncResponseTransformer<>(producer)))
+        single(s3.getObject(VertxS3ClientSpec::downloadImgReq, transformer))
                 .subscribe(getRes -> {}, ctx::failNow);
     }
 

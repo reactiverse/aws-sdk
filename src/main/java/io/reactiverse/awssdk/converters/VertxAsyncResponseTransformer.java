@@ -1,12 +1,14 @@
 package io.reactiverse.awssdk.converters;
 
 import io.reactiverse.awssdk.reactivestreams.WriteStreamSubscriber;
+import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.WriteStream;
 import software.amazon.awssdk.core.async.AsyncResponseTransformer;
 import software.amazon.awssdk.core.async.SdkPublisher;
 
 import java.nio.ByteBuffer;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class VertxAsyncResponseTransformer<ResponseT> implements AsyncResponseTransformer<ResponseT, WriteStream<Buffer>> {
@@ -14,6 +16,7 @@ public class VertxAsyncResponseTransformer<ResponseT> implements AsyncResponseTr
     private volatile CompletableFuture<WriteStream<Buffer>> cf;
     private volatile ResponseT response;
     private volatile WriteStream<Buffer> writeStream;
+    private volatile Optional<Handler<ResponseT>> responseHandler;
 
     public VertxAsyncResponseTransformer(WriteStream<Buffer> ws) {
         this.writeStream = ws;
@@ -28,6 +31,7 @@ public class VertxAsyncResponseTransformer<ResponseT> implements AsyncResponseTr
     @Override
     public void onResponse(ResponseT response) {
         this.response = response;
+        this.responseHandler.ifPresent(handler -> handler.handle(response));
     }
 
     @Override
@@ -38,5 +42,10 @@ public class VertxAsyncResponseTransformer<ResponseT> implements AsyncResponseTr
     @Override
     public void exceptionOccurred(Throwable error) {
         cf.completeExceptionally(error);
+    }
+
+    public VertxAsyncResponseTransformer<ResponseT> setResponseHandler(Handler<ResponseT> handler) {
+        this.responseHandler = Optional.of(handler);
+        return this;
     }
 }
