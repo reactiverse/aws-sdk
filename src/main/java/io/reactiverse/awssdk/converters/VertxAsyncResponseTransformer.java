@@ -14,12 +14,12 @@ import java.util.concurrent.CompletableFuture;
 public class VertxAsyncResponseTransformer<ResponseT> implements AsyncResponseTransformer<ResponseT, WriteStream<Buffer>> {
 
     private volatile CompletableFuture<WriteStream<Buffer>> cf;
-    private volatile ResponseT response;
     private volatile WriteStream<Buffer> writeStream;
     private volatile Optional<Handler<ResponseT>> responseHandler;
 
     public VertxAsyncResponseTransformer(WriteStream<Buffer> ws) {
         this.writeStream = ws;
+        responseHandler = Optional.empty();
     }
 
     @Override
@@ -30,7 +30,6 @@ public class VertxAsyncResponseTransformer<ResponseT> implements AsyncResponseTr
 
     @Override
     public void onResponse(ResponseT response) {
-        this.response = response;
         this.responseHandler.ifPresent(handler -> handler.handle(response));
     }
 
