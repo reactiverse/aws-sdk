@@ -7,6 +7,8 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import java.nio.ByteBuffer;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public class WriteStreamSubscriber<T extends WriteStream<Buffer>> implements Subscriber<ByteBuffer> {
 
@@ -14,9 +16,16 @@ public class WriteStreamSubscriber<T extends WriteStream<Buffer>> implements Sub
 
     protected T stream;
     private Subscription subscription;
+    private Optional<CompletableFuture<WriteStream<Buffer>>> cf;
 
     public WriteStreamSubscriber(T stream) {
         this.stream = stream;
+        cf = Optional.empty();
+    }
+
+    public WriteStreamSubscriber(T stream, CompletableFuture<WriteStream<Buffer>> cf) {
+        this.stream = stream;
+        this.cf = Optional.of(cf);
     }
 
     @Override
@@ -43,5 +52,6 @@ public class WriteStreamSubscriber<T extends WriteStream<Buffer>> implements Sub
     @Override
     public void onComplete() {
         stream.end();
+        cf.map(fut -> fut.complete(stream));
     }
 }

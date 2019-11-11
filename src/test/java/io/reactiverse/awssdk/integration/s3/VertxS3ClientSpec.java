@@ -2,11 +2,14 @@ package io.reactiverse.awssdk.integration.s3;
 
 import cloud.localstack.docker.LocalstackDockerExtension;
 import cloud.localstack.docker.annotation.LocalstackDockerProperties;
+import io.reactiverse.awssdk.converters.VertxAsyncResponseTransformer;
 import io.reactiverse.awssdk.integration.LocalStackBaseSpec;
 import io.reactiverse.awssdk.reactivestreams.ReadStreamPublisher;
 import io.reactivex.Single;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.eventbus.MessageProducer;
 import io.vertx.core.file.OpenOptions;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
@@ -26,21 +29,24 @@ import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.model.Bucket;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
 @LocalstackDockerProperties(services = { "s3" }, imageTag = "0.10.2")
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class VertxS3ClientSpec extends LocalStackBaseSpec {
+class VertxS3ClientSpec extends LocalStackBaseSpec {
 
     private final static String BUCKET_NAME = "my-vertx-bucket";
     private final static String IMG_FOLDER = "src/test/resources/";
@@ -53,14 +59,14 @@ public class VertxS3ClientSpec extends LocalStackBaseSpec {
     private long fileSize;
 
     @BeforeEach
-    public void fileSize() throws Exception {
+    void fileSize() throws Exception {
         fileSize = ClassLoader.getSystemResource(RESOURCE_PATH).openConnection().getContentLength();
     }
 
     @Test
     @Order(1)
     @Timeout(value = 60, timeUnit = TimeUnit.SECONDS)
-    public void createS3Bucket(Vertx vertx, VertxTestContext ctx) throws Exception {
+    void createS3Bucket(Vertx vertx, VertxTestContext ctx) throws Exception {
         final Context originalContext = vertx.getOrCreateContext();
         final S3AsyncClient s3 = s3(originalContext);
         single(s3.createBucket(VertxS3ClientSpec::createBucketReq))
@@ -72,7 +78,7 @@ public class VertxS3ClientSpec extends LocalStackBaseSpec {
 
     @Test
     @Order(2)
-    public void listBuckets(Vertx vertx, VertxTestContext ctx) throws Exception {
+    void listBuckets(Vertx vertx, VertxTestContext ctx) throws Exception {
         final Context originalContext = vertx.getOrCreateContext();
         final S3AsyncClient s3 = s3(originalContext);
         single(s3.listBuckets())
@@ -90,7 +96,7 @@ public class VertxS3ClientSpec extends LocalStackBaseSpec {
 
     @Test
     @Order(3)
-    public void publishImageToBucket(Vertx vertx, VertxTestContext ctx) throws Exception {
+    void publishImageToBucket(Vertx vertx, VertxTestContext ctx) throws Exception {
         final Context originalContext = vertx.getOrCreateContext();
         final S3AsyncClient s3 = s3(originalContext);
         readFileFromDisk(vertx)
@@ -109,7 +115,7 @@ public class VertxS3ClientSpec extends LocalStackBaseSpec {
 
     @Test
     @Order(4)
-    public void getImageFromBucket(Vertx vertx, VertxTestContext ctx) throws Exception {
+    void getImageFromBucket(Vertx vertx, VertxTestContext ctx) throws Exception {
         final Context originalContext = vertx.getOrCreateContext();
         final S3AsyncClient s3 = s3(originalContext);
         single(s3.listObjects(VertxS3ClientSpec::listObjectsReq))
@@ -127,7 +133,7 @@ public class VertxS3ClientSpec extends LocalStackBaseSpec {
 
     @Test
     @Order(5)
-    public void downloadImageFromBucket(Vertx vertx, VertxTestContext ctx) throws Exception {
+    void downloadImageFromBucket(Vertx vertx, VertxTestContext ctx) throws Exception {
         final Context originalContext = vertx.getOrCreateContext();
         final S3AsyncClient s3 = s3(originalContext);
         single(s3.getObject(VertxS3ClientSpec::downloadImgReq, AsyncResponseTransformer.toBytes()))
@@ -140,6 +146,41 @@ public class VertxS3ClientSpec extends LocalStackBaseSpec {
                 });
             }, ctx::failNow);
     }
+
+    @Test
+    @Order(6)
+    void downloadImageFromBucketToPump(Vertx vertx, VertxTestContext ctx) throws Exception {
+        final Context originalContext = vertx.getOrCreateContext();
+        final S3AsyncClient s3 = s3(originalContext);
+        final String ebAddress = "s3-forwarded";
+        final MessageProducer<Buffer> producer = vertx.eventBus().sender(ebAddress);
+        final Buffer received = Buffer.buffer();
+        AtomicBoolean handlerCalled = new AtomicBoolean(false);
+        VertxAsyncResponseTransformer<GetObjectResponse> transformer = new VertxAsyncResponseTransformer<>(producer);
+        transformer.setResponseHandler(resp -> {
+            handlerCalled.set(true);
+        });
+        vertx.eventBus().<Buffer>consumer(ebAddress, msg -> {
+            assertTrue(handlerCalled.get(), "Response handler should have been called before first bytes are received");
+            received.appendBuffer(msg.body());
+            if (received.length() == fileSize) ctx.completeNow();
+        });
+        single(s3.getObject(VertxS3ClientSpec::downloadImgReq, transformer))
+                .subscribe(getRes -> {}, ctx::failNow);
+    }
+
+    @Test
+    @Order(7)
+    void downloadImageFromBucketWithoutSettingResponseHandler(Vertx vertx, VertxTestContext ctx) throws Exception {
+        final Context originalContext = vertx.getOrCreateContext();
+        final S3AsyncClient s3 = s3(originalContext);
+        final String ebAddress = "s3-forwarded";
+        final MessageProducer<Buffer> producer = vertx.eventBus().sender(ebAddress);
+        VertxAsyncResponseTransformer<GetObjectResponse> transformer = new VertxAsyncResponseTransformer<>(producer);
+        single(s3.getObject(VertxS3ClientSpec::downloadImgReq, transformer))
+                .subscribe(getRes -> ctx.completeNow(), ctx::failNow);
+    }
+
 
     /* Utility methods */
     private static Single<AsyncFile> readFileFromDisk(Vertx vertx) {
