@@ -22,18 +22,6 @@ repositories {
     }
 }
 
-bintray {
-    user = System.getenv("BINTRAY_USER")
-    key = System.getenv("BINTRAY_KEY")
-    pkg.apply {
-        repo = "releases"
-        name = "aws-sdk"
-        userOrg = "reactiverse"
-        setLicenses("Apache-2.0")
-        vcsUrl = githubURL
-    }
-}
-
 group = "io.reactiverse"
 version = "0.4.0"
 
@@ -124,8 +112,6 @@ publishing {
     publications {
         create<MavenPublication>("mavenJava") {
             from(components["java"])
-            artifact(tasks["sourcesJar"])
-            artifact(tasks["javadocJar"])
             pom {
                 name.set(project.name)
                 description.set("Reactiverse AWS SDK 2 with Vert.x")
@@ -174,7 +160,22 @@ publishing {
     }
 }
 
-signing {
-    sign(publishing.publications["mavenJava"])
+bintray {
+    user = System.getenv("BINTRAY_USER")
+    key = System.getenv("BINTRAY_KEY")
+    pkg.apply {
+        repo = "releases"
+        name = "aws-sdk"
+        userOrg = "reactiverse"
+        setLicenses("Apache-2.0")
+        vcsUrl = githubURL
+    }
+    setPublications(publishing.publications["mavenJava"].name)
 }
 
+if (project.hasProperty("signing.keyId")) {
+    plugins.apply("signing")
+    signing {
+        sign(publishing.publications["mavenJava"])
+    }
+}
