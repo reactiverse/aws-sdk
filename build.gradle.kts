@@ -1,8 +1,9 @@
-val vertxVersion = "3.8.0"
-val awsSdkVersion = "2.7.8"
+val vertxVersion = "3.8.3"
+val awsSdkVersion = "2.10.16"
 val junit5Version = "5.4.0"
 val logbackVersion = "1.2.3"
 val integrationOption = "tests.integration"
+val githubURL = "https://github.com/reactiverse/aws-sdk"
 
 plugins {
     `java-library`
@@ -11,6 +12,7 @@ plugins {
     jacoco
     id("com.jaredsburrows.license") version "0.8.42"
     id("org.sonarqube") version "2.6"
+    id("com.jfrog.bintray") version "1.8.4"
 }
 
 repositories {
@@ -20,8 +22,20 @@ repositories {
     }
 }
 
+bintray {
+    user = System.getenv("BINTRAY_USER")
+    key = System.getenv("BINTRAY_KEY")
+    pkg.apply {
+        repo = "releases"
+        name = "aws-sdk"
+        userOrg = "reactiverse"
+        setLicenses("Apache-2.0")
+        vcsUrl = githubURL
+    }
+}
+
 group = "io.reactiverse"
-version = "0.0.1-SNAPSHOT"
+version = "0.4.0"
 
 project.extra["isReleaseVersion"] = !version.toString().endsWith("SNAPSHOT")
 
@@ -44,13 +58,14 @@ dependencies {
     testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
     testImplementation("ch.qos.logback:logback-core:$logbackVersion")
     testImplementation("software.amazon.awssdk:aws-sdk-java:$awsSdkVersion")
-
-    testCompile("org.junit.jupiter:junit-jupiter-engine:$junit5Version")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:$junit5Version")
 }
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+    withJavadocJar()
+    withSourcesJar()
 }
 
 jacoco {
@@ -83,16 +98,6 @@ tasks {
         dependsOn("javadocToDocsFolder")
     }
 
-    create<Jar>("sourcesJar") {
-        from(sourceSets.main.get().allJava)
-        archiveClassifier.set("sources")
-    }
-
-    create<Jar>("javadocJar") {
-        from(javadoc)
-        archiveClassifier.set("javadoc")
-    }
-
     javadoc {
         if (JavaVersion.current().isJava9Compatible) {
             (options as StandardJavadocDocletOptions).addBooleanOption("html5", true)
@@ -111,7 +116,7 @@ tasks {
     }
 
     withType<Wrapper> {
-        gradleVersion = "5.4.1"
+        gradleVersion = "6.0"
     }
 }
 
@@ -124,7 +129,7 @@ publishing {
             pom {
                 name.set(project.name)
                 description.set("Reactiverse AWS SDK 2 with Vert.x")
-                url.set("https://github.com/reactiverse/aws-sdk")
+                url.set(githubURL)
                 licenses {
                     license {
                         name.set("The Apache License, Version 2.0")

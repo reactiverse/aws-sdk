@@ -27,7 +27,7 @@
 
   <groupId>io.reactiverse</groupId>
   <artifactId>vertx-aws-sdk</artifactId>
-  <version>0.0.4-SNAPSHOT</version>
+  <version>0.4.0</version>
 
   <name>AWS SDK for Vert.x</name>
 
@@ -61,7 +61,7 @@
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-dependencies</artifactId>
-        <version>3.8.1</version>
+        <version>3.8.3</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -76,7 +76,7 @@
     <dependency>
       <groupId>software.amazon.awssdk</groupId>
       <artifactId>aws-core</artifactId>
-      <version>2.7.8</version>
+      <version>2.10.16</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
