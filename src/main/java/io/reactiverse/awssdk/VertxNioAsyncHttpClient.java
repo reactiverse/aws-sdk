@@ -55,11 +55,11 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
                 vRequest.putHeader(headerName, String.join(",", headerValues))
         );
         vRequest.putHeader(HttpHeaders.CONNECTION, HttpHeaders.KEEP_ALIVE);
-        vRequest.exceptionHandler(error -> {
-            responseHandler.onError(error);
-            fut.completeExceptionally(error);
+        vRequest.onFailure(failure -> {
+            responseHandler.onError(failure);
+            fut.completeExceptionally(failure);
         });
-        vRequest.handler(vResponse -> {
+        vRequest.onSuccess(vResponse -> {
             final SdkHttpFullResponse.Builder builder = SdkHttpResponse.builder()
                     .statusCode(vResponse.statusCode())
                     .statusText(vResponse.statusMessage());
