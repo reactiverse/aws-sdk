@@ -100,7 +100,7 @@ tasks {
         (options as StandardJavadocDocletOptions).links(
             "http://docs.oracle.com/javase/8/docs/api/",
             "https://sdk.amazonaws.com/java/api/latest/",
-            "http://vertx.io/docs/3.8.0/apidocs/",
+            "http://vertx.io/docs/3.9.0/apidocs/",
             "http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/",
             "http://netty.io/4.1/api/"
         )
@@ -123,7 +123,7 @@ publishing {
             artifact(tasks["javadocJar"])
             pom {
                 name.set(project.name)
-                description.set("Reactiverse AWS SDK 2 with Vert.x")
+                description.set("Reactiverse AWS SDK v2 with Vert.x")
                 url.set("https://github.com/reactiverse/aws-sdk")
                 licenses {
                     license {
