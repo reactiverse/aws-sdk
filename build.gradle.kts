@@ -1,5 +1,5 @@
-val vertxVersion = "3.8.0"
-val awsSdkVersion = "2.7.8"
+val vertxVersion = "3.9.0"
+val awsSdkVersion = "2.12.0"
 val junit5Version = "5.4.0"
 val logbackVersion = "1.2.3"
 val integrationOption = "tests.integration"
@@ -21,7 +21,7 @@ repositories {
 }
 
 group = "io.reactiverse"
-version = "0.0.1-SNAPSHOT"
+version = "0.5.0-SNAPSHOT"
 
 project.extra["isReleaseVersion"] = !version.toString().endsWith("SNAPSHOT")
 
@@ -54,7 +54,7 @@ java {
 }
 
 jacoco {
-    toolVersion = "0.8.2"
+    toolVersion = "0.8.5"
 }
 
 tasks {
@@ -111,7 +111,7 @@ tasks {
     }
 
     withType<Wrapper> {
-        gradleVersion = "5.4.1"
+        gradleVersion = "6.3"
     }
 }
 
