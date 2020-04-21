@@ -1,8 +1,6 @@
 # Always tests on every branch push / PR / master
 name: CI-Test
-on:
-  pull_request:
-    branches: *
+on: push
 
 jobs:
   test:

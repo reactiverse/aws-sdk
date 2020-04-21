@@ -2,10 +2,10 @@
 name: CI-Snapshot
 on:
   push:
-    tags: ^v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+\.*SNAPSHOT
+    tags: SNAPSHOT-*
 
 jobs:
-  tests:
+  publish-snapshot-sonatype:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

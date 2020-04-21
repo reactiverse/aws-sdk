@@ -1,8 +1,11 @@
 # When a tag matching a semver number (like `1.1.0`) is pushed, then tyr to publish the version to bintray and create the matching release in Github
 name: CI-Release
-on: push
+on:
+  push:
+    tags: RELEASE-*
+
 jobs:
-  release:
+  publish-release-bintray:
     runs-on: ubuntu-latest
     steps:
       - name: Releases the version to Bintray
@@ -17,6 +20,6 @@ jobs:
       - name: Create GitHub release
         uses: Roang-zero1/github-create-release-action@v2
         with:
-          version_regex: ^v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+
+          version_regex: ^RELEASE-[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
