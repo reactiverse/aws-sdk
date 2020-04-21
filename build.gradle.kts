@@ -125,6 +125,7 @@ publishing {
             from(components["java"])
             artifact(tasks["sourcesJar"])
             artifact(tasks["javadocJar"])
+            setVersion(project.version)
             pom {
                 name.set(project.name)
                 description.set("Reactiverse AWS SDK v2 with Vert.x")
