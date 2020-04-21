@@ -14,6 +14,8 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.java }}
+      - name: Pre-Pull localstack image
+        run: "docker pull localstack/localstack:0.10.2"
       - uses: eskatos/gradle-command-action@v1
         with:
           gradle-version: 6.3
