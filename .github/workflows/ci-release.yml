@@ -19,7 +19,8 @@ jobs:
           gradle-version: 6.3
           arguments: test bintrayUpload
         env:
-
+          BINTRAY_USER: ${{secrets.BINTRAY_USER}}
+          BINTRAY_KEY: ${{secrets.BINTRAY_KEY}}
       - name: Create GitHub release
         uses: Roang-zero1/github-create-release-action@v2
         with:
