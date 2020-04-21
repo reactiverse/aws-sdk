@@ -4,13 +4,35 @@ val junit5Version = "5.4.0"
 val logbackVersion = "1.2.3"
 val integrationOption = "tests.integration"
 
+group = "io.reactiverse"
+version = "0.5.0"
+
 plugins {
     `java-library`
     `maven-publish`
-    signing
     jacoco
+    id("com.jfrog.bintray") version "1.8.5"
     id("com.jaredsburrows.license") version "0.8.42"
     id("org.sonarqube") version "2.6"
+}
+
+bintray {
+    user    = System.getenv("BINTRAY_USER")
+    key     = System.getenv("BINTRAY_KEY")
+    with(pkg) {
+        userOrg = "reactiverse"
+        repo = "releases"
+        name = project.name
+        setLicenses("Apache-2.0")
+        vcsUrl = "https://github.com/reactiverse/aws-sdk"
+        setLabels("vertx", "vert.x", "aws-sdk", "amazon web services")
+        publicDownloadNumbers = true
+        with(version) {
+            name = project.version.toString()
+            description = "${project.description}. Version: ${project.version}"
+        }
+        setPublications("mavenJava")
+    }
 }
 
 repositories {
@@ -18,20 +40,6 @@ repositories {
     maven {
         url = uri("https://oss.sonatype.org/content/repositories/snapshots")
     }
-}
-
-group = "io.reactiverse"
-version = "0.5.0-SNAPSHOT"
-
-project.extra["isReleaseVersion"] = !version.toString().endsWith("SNAPSHOT")
-
-if (!project.hasProperty("ossrhUsername")) {
-    logger.warn("No ossrhUsername property defined in your Gradle properties file to deploy to Maven Central, using 'foo' to make the build pass")
-    project.extra["ossrhUsername"] = "foo"
-}
-if (!project.hasProperty("ossrhPassword")) {
-    logger.warn("No ossrhPassword property defined in your Gradle properties file to deploy to Maven Central, using 'bar' to make the build pass")
-    project.extra["ossrhPassword"] = "bar"
 }
 
 dependencies {
@@ -106,10 +114,6 @@ tasks {
         )
     }
 
-    withType<Sign> {
-        onlyIf { project.extra["isReleaseVersion"] as Boolean }
-    }
-
     withType<Wrapper> {
         gradleVersion = "6.3"
     }
@@ -146,30 +150,4 @@ publishing {
             }
         }
     }
-    repositories {
-        // To locally check out the poms
-        maven {
-            val releasesRepoUrl = uri("$buildDir/repos/releases")
-            val snapshotsRepoUrl = uri("$buildDir/repos/snapshots")
-            name = "BuildDir"
-            url = if (project.extra["isReleaseVersion"] as Boolean) releasesRepoUrl else snapshotsRepoUrl
-        }
-        maven {
-            val releasesRepoUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-            val snapshotsRepoUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-            name = "SonatypeOSS"
-            url = if (project.extra["isReleaseVersion"] as Boolean) releasesRepoUrl else snapshotsRepoUrl
-            credentials {
-                val ossrhUsername: String by project
-                val ossrhPassword: String by project
-                username = ossrhUsername
-                password = ossrhPassword
-            }
-        }
-    }
 }
-
-signing {
-    sign(publishing.publications["mavenJava"])
-}
-

@@ -15,10 +15,5 @@ jobs:
       jdk: openjdk8
       script: ./gradlew --no-daemon -i --stacktrace jacocoTestReport
       after_success: bash <(curl -s https://codecov.io/bash)
-    - stage: deploy
-      name: Deploy snapshots to Sonatype OSS
-      jdk: openjdk8
-      if: type != pull_request AND env(SONATYPE_NEXUS_USERNAME) IS present
-      script: bash .travis.deploy.artifacts.sh
 notifications:
   email: false
