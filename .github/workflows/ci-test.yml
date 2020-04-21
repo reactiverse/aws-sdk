@@ -1,0 +1,22 @@
+# Always tests on every branch push / PR / master
+name: CI-Test
+on:
+  pull_request:
+    branches: *
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ 8, 11 ]
+    name: "Run tests with JDK ${{ matrix.java }}"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+      - uses: eskatos/gradle-command-action@v1
+        with:
+          gradle-version: 6.3
+          arguments: test
