@@ -16,6 +16,18 @@ plugins {
     id("org.sonarqube") version "2.6"
 }
 
+// In order to publish SNAPSHOTs to Sonatype Snapshots repository => the CI should define such `ossrhUsername` and `ossrhPassword` properties
+if (!project.hasProperty("ossrhUsername")) {
+    logger.warn("No ossrhUsername property defined in your Gradle properties file to deploy to Sonatype Snapshots, using 'foo' to make the build pass")
+    project.extra["ossrhUsername"] = "foo"
+}
+if (!project.hasProperty("ossrhPassword")) {
+    logger.warn("No ossrhPassword property defined in your Gradle properties file to deploy to Sonatype Snapshots, using 'bar' to make the build pass")
+    project.extra["ossrhPassword"] = "bar"
+}
+
+// Releases are published to Bintray under the Reactiverse organization
+// Then manually synced to Central
 bintray {
     user    = System.getenv("BINTRAY_USER")
     key     = System.getenv("BINTRAY_KEY")
@@ -147,6 +159,24 @@ publishing {
                     connection.set("scm:git:git@github.com:reactiverse/aws-sdk.git")
                     developerConnection.set("scm:git:git@github.com:reactiverse/aws-sdk.git")
                     url.set("https://github.com/reactiverse/aws-sdk")
+                }
+            }
+            repositories {
+                // To locally check out the poms
+                maven {
+                    name = "BuildDir"
+                    url = uri("$buildDir/repos/snapshots")
+                }
+                // Snapshots are published to Sonatype's repository directly
+                maven {
+                    name = "SonatypeOSS"
+                    url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+                    credentials {
+                        val ossrhUsername: String by project
+                        val ossrhPassword: String by project
+                        username = ossrhUsername
+                        password = ossrhPassword
+                    }
                 }
             }
         }
