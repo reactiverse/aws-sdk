@@ -1,8 +1,8 @@
-# Always tests on every branch push / PR / master
 name: CI-Snapshot
 on:
   push:
-    tags: SNAPSHOT-*
+    tags:
+      - SNAPSHOT-*
 
 jobs:
   publish-snapshot-sonatype:
