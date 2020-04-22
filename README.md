@@ -12,6 +12,8 @@ Artifacts are published [here](https://search.maven.org/search?q=a:vertx-aws-sdk
 
 | Project | Vert.x | AWS sdk |
 | ------- | ------ | ------- |
+|  0.5.0  | 3.9.0  | 2.12.0  |
+|  0.4.0  | 3.8.3  | 2.10.16 |
 |  0.3.0  | 3.8.1  | 2.7.8   |
 
 ## Documentation
