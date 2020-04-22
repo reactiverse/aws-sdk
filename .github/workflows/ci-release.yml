@@ -1,0 +1,39 @@
+# When a tag matching a semver number (like `1.1.0`) is pushed, then tyr to publish the version to bintray and create the matching release in Github
+name: CI-Release
+on:
+  push:
+    tags:
+      - RELEASE-*
+
+jobs:
+  publish-release-bintray:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d '-' -f 2)
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Release to Bintray
+        uses: eskatos/gradle-command-action@v1
+        with:
+          gradle-version: 6.3
+          arguments: test bintrayUpload
+        env:
+          BINTRAY_USER: ${{secrets.BINTRAY_USER}}
+          BINTRAY_KEY: ${{secrets.BINTRAY_KEY}}
+      - name: Creates a Release in Github
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          release_name: ${{ steps.get_version.outputs.VERSION }}
+          body: |
+            Available in Bintray/Sonatype repositories under:
+            `io.reactiverse:aws-sdk:${{ steps.get_version.outputs.VERSION }}`
+          draft: false
+          prerelease: false
+
