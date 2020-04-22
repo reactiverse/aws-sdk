@@ -25,8 +25,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
           tag_name: ${{ steps.get_version.outputs.VERSION }}-SNAPSHOT
-          release_name: SNAPSHOT ${{ steps.get_version.outputs.VERSION }}-SNAPSHOT
+          release_name: ${{ steps.get_version.outputs.VERSION }}-SNAPSHOT
           body: |
-            Available in Sonatype SNAPSHOT: io.reactiverse:aws-sdk:${{ steps.get_version.outputs.VERSION }}-SNAPSHOT
+            Available in Sonatype SNAPSHOTs repository under:
+            `io.reactiverse:aws-sdk:${{ steps.get_version.outputs.VERSION }}-SNAPSHOT`
           draft: true
           prerelease: true
