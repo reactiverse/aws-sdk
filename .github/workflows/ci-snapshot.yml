@@ -9,6 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d '-' -f 2)
       - uses: actions/setup-java@v1
         with:
           java-version: 11
@@ -21,9 +24,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag_name: ${{ github.ref:9 }}
-          release_name: SNAPSHOT ${{ github.ref:9 }}
+          tag_name: ${{ steps.get_version.outputs.VERSION }}-SNAPSHOT
+          release_name: SNAPSHOT ${{ steps.get_version.outputs.VERSION }}-SNAPSHOT
           body: |
-            Available in Sonatype SNAPSHOT: io.reactiverse:aws-sdk:${{ github.ref:9 }}
+            Available in Sonatype SNAPSHOT: io.reactiverse:aws-sdk:${{ steps.get_version.outputs.VERSION }}-SNAPSHOT
           draft: true
           prerelease: true
