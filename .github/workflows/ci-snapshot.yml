@@ -16,3 +16,23 @@ jobs:
         with:
           gradle-version: 6.3
           arguments: assemble publish -PossrhUsername=${{secrets.SONATYPE_NEXUS_USERNAME}} -PossrhPassword=${{secrets.SONATYPE_NEXUS_PASSWORD}}
+      - name: Get version from Gradle and store it
+        id: versionFromGradle
+        uses: eskatos/gradle-command-action@v1
+        with:
+          gradle-version: 6.3
+        run: |
+          echo ::set-output name=project_version::"$(gradle properties -q | grep "version:" | awk '{print $2}')"
+      - name: Create Snapshot Release in Github
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: SNAPSHOT ${{ github.ref }}
+          body: |
+            Available in Sonatype SNAPSHOT: io.reactiverse:aws-sdk:$project_version
+          draft: true
+          prerelease: true
+          env:
+            project_version: ${{ steps.versionFromGradle.outputs.project_version }}
