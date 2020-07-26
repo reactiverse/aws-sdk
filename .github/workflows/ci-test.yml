@@ -18,5 +18,5 @@ jobs:
         run: "docker pull localstack/localstack:0.10.2"
       - uses: eskatos/gradle-command-action@v1
         with:
-          gradle-version: 6.3
+          gradle-version: 6.5
           arguments: test -Dtests.integration=localstack
