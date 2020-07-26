@@ -117,12 +117,15 @@ tasks {
         if (JavaVersion.current().isJava9Compatible) {
             (options as StandardJavadocDocletOptions).addBooleanOption("html5", true)
         }
+        options {
+            source("8")
+        }
         (options as StandardJavadocDocletOptions).links(
-            "http://docs.oracle.com/javase/8/docs/api/",
+            "https://docs.oracle.com/javase/8/docs/api/",
             "https://sdk.amazonaws.com/java/api/latest/",
-            "http://vertx.io/docs/3.9.0/apidocs/",
+            "https://vertx.io/docs/${vertxVersion}/apidocs/",
             "http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/",
-            "http://netty.io/4.1/api/"
+            "https://netty.io/4.1/api/"
         )
     }
 
