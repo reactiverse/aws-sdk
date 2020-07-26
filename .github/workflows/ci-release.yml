@@ -1,4 +1,4 @@
-# When a tag matching a semver number (like `1.1.0`) is pushed, then tyr to publish the version to bintray and create the matching release in Github
+# When a tag matching a semver number (like `1.1.0`) is pushed, then try to publish the version to bintray and create the matching release in Github
 name: CI-Release
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
       - name: Release to Bintray
         uses: eskatos/gradle-command-action@v1
         with:
-          gradle-version: 6.3
+          gradle-version: 6.5
           arguments: test bintrayUpload
         env:
           BINTRAY_USER: ${{secrets.BINTRAY_USER}}

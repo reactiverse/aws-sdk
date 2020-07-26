@@ -1,11 +1,11 @@
-val vertxVersion = "3.9.0"
-val awsSdkVersion = "2.12.0"
+val vertxVersion = "3.9.2"
+val awsSdkVersion = "2.13.6"
 val junit5Version = "5.4.0"
 val logbackVersion = "1.2.3"
 val integrationOption = "tests.integration"
 
 group = "io.reactiverse"
-version = "0.5.0"
+version = "0.5.1"
 
 plugins {
     `java-library`
@@ -127,7 +127,7 @@ tasks {
     }
 
     withType<Wrapper> {
-        gradleVersion = "6.3"
+        gradleVersion = "6.5"
     }
 }
 
