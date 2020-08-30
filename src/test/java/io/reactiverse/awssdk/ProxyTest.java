@@ -83,13 +83,14 @@ public class ProxyTest {
       .credentialsProvider(credentialsProvider);
     HttpClientOptions throughProxyOptions = new HttpClientOptions().setProxyOptions(new ProxyOptions().setHost(PROXY_HOST).setPort(PROXY_PORT));
     KinesisAsyncClient kinesis = VertxSdkClient.withVertx(builder, throughProxyOptions, vertx.getOrCreateContext()).build();
-    CompletableFuture<ListStreamsResponse> fut = kinesis.listStreams();
     assertEquals(proxyAccess.get(), 0, "Proxy access count should have been reset");
-    fut.handle((res, err) -> {
-      assertTrue(proxyAccess.get() > 0, "Requests should have been transferred through proxy");
-      ctx.completeNow();
-      return null;
-    });
+    kinesis
+      .listStreams()
+      .handle((res, err) -> {
+        assertTrue(proxyAccess.get() > 0, "Requests should have been transferred through proxy");
+        ctx.completeNow();
+        return null;
+      });
   }
 
 }
