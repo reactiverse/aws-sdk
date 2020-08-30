@@ -1,11 +1,11 @@
 val vertxVersion = "3.9.2"
-val awsSdkVersion = "2.13.6"
+val awsSdkVersion = "2.14.7"
 val junit5Version = "5.4.0"
 val logbackVersion = "1.2.3"
 val integrationOption = "tests.integration"
 
 group = "io.reactiverse"
-version = "0.5.1"
+version = "0.6.0"
 
 plugins {
     `java-library`
