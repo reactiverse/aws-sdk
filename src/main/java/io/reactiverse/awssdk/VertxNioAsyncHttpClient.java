@@ -14,23 +14,36 @@ import software.amazon.awssdk.http.async.SdkAsyncHttpClient;
 import software.amazon.awssdk.http.async.SdkAsyncHttpResponseHandler;
 import software.amazon.awssdk.http.async.SdkHttpContentPublisher;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+
+import static java.util.Objects.requireNonNull;
 
 public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
 
     private final Context context;
     private final HttpClient client;
+    private final HttpClientOptions clientOptions;
+
+    private static final HttpClientOptions DEFAULT_CLIENT_OPTIONS = new HttpClientOptions()
+      .setSsl(true)
+      .setKeepAlive(true);
 
     public VertxNioAsyncHttpClient(Context context) {
-        this.context = context;
-        this.client = createVertxHttpClient(context.owner());
+      this.context = context;
+      this.clientOptions = DEFAULT_CLIENT_OPTIONS;
+      this.client = createVertxHttpClient(context.owner());
     }
 
-    private static HttpClient createVertxHttpClient(Vertx vertx) {
-        HttpClientOptions options = new HttpClientOptions()
-            .setSsl(true)
-            .setKeepAlive(true);
-        return vertx.createHttpClient(options);
+    public VertxNioAsyncHttpClient(Context context, HttpClientOptions clientOptions) {
+      requireNonNull(clientOptions);
+      this.context = context;
+      this.clientOptions = clientOptions;
+      this.client = createVertxHttpClient(context.owner());
+    }
+
+    private HttpClient createVertxHttpClient(Vertx vertx) {
+      return vertx.createHttpClient(clientOptions);
     }
 
     @Override
