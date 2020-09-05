@@ -6,7 +6,7 @@ This project provides a `VertxNioAsyncHttpClient` and a `VertxExecutor` so that 
 
 ## Coordinates
 
-Artifacts are published [here](https://search.maven.org/search?q=a:vertx-aws-sdk)
+Artifacts are published [here](https://search.maven.org/artifact/io.reactiverse/aws-sdk)
 
 ## Version compatibility matrix
 
