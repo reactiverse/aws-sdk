@@ -1,4 +1,4 @@
-val vertxVersion = "3.9.2"
+val vertxVersion = "3.9.4"
 val awsSdkVersion = "2.14.7"
 val junit5Version = "5.4.0"
 val logbackVersion = "1.2.3"
