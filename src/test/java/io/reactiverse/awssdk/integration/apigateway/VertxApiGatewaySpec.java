@@ -60,7 +60,8 @@ public class VertxApiGatewaySpec extends LocalStackBaseSpec {
     private String resourceId;
 
     // README: see below for the full test
-    // But: https://github.com/localstack/localstack/issues/1030
+    // Since: https://github.com/localstack/localstack/issues/1030 has been fixed, it should work, but there's another issue
+    // (on the test design this time: No integration defined for method "Service: ApiGateway" => investigate later)
     // For now we're just testing creation requests, but not the actual routing one, because localstack doesn't allow it
     @Test
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
