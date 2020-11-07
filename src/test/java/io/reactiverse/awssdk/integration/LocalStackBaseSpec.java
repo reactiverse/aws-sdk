@@ -1,6 +1,6 @@
 package io.reactiverse.awssdk.integration;
 
-import cloud.localstack.docker.LocalstackDocker;
+import cloud.localstack.Localstack;
 import io.reactivex.Single;
 import io.reactivex.SingleOnSubscribe;
 import io.vertx.core.Context;
@@ -39,7 +39,7 @@ public abstract class LocalStackBaseSpec {
     }
 
     protected static URI s3URI() throws Exception {
-        return new URI(LocalstackDocker.INSTANCE.getEndpointS3());
+        return new URI(Localstack.INSTANCE.getEndpointS3());
     }
 
     protected static S3AsyncClient s3(Context context) throws Exception {

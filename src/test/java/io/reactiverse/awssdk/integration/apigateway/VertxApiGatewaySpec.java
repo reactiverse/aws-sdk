@@ -1,6 +1,6 @@
 package io.reactiverse.awssdk.integration.apigateway;
 
-import cloud.localstack.docker.LocalstackDocker;
+import cloud.localstack.Localstack;
 import cloud.localstack.docker.LocalstackDockerExtension;
 import cloud.localstack.docker.annotation.LocalstackDockerProperties;
 import io.reactiverse.awssdk.VertxSdkClient;
@@ -40,13 +40,13 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
-@LocalstackDockerProperties(services = { "apigateway" }, imageTag = "0.10.2")
+@LocalstackDockerProperties(services = { "apigateway" }, imageTag = "0.12.2")
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
 public class VertxApiGatewaySpec extends LocalStackBaseSpec {
 
-    private final static String API_NAME = "My-API";
-    private final static String PATH = "/faking";
+    private final static String API_NAME = "MyAPI";
+    private final static String PATH = "faking";
     private final static HttpMethod METHOD = HttpMethod.GET;
     private final static Map<String, String> TEMPLATES = new HashMap<>();
     private final static String MOCK_RESPONSE = "{\"message\": \"Hello from a fake backend\"}";
@@ -60,7 +60,8 @@ public class VertxApiGatewaySpec extends LocalStackBaseSpec {
     private String resourceId;
 
     // README: see below for the full test
-    // But: https://github.com/localstack/localstack/issues/1030
+    // Since: https://github.com/localstack/localstack/issues/1030 has been fixed, it should work, but there's another issue
+    // (on the test design this time: No integration defined for method "Service: ApiGateway" => investigate later)
     // For now we're just testing creation requests, but not the actual routing one, because localstack doesn't allow it
     @Test
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
@@ -174,11 +175,11 @@ public class VertxApiGatewaySpec extends LocalStackBaseSpec {
     private static CreateRestApiRequest.Builder restApiDefinition(CreateRestApiRequest.Builder rar) {
         return rar.name(API_NAME)
                 .binaryMediaTypes("text/plain")
-                .description("Fetches weather");
+                .description("Fetches_weather");
     }
 
     private void createGatewayClient(Context context) throws Exception {
-        final URI gatewayURI = new URI(LocalstackDocker.INSTANCE.getEndpointAPIGateway());
+        final URI gatewayURI = new URI(Localstack.INSTANCE.getEndpointAPIGateway());
         final ApiGatewayAsyncClientBuilder builder = ApiGatewayAsyncClient.builder()
                 .region(Region.US_EAST_1)
                 .credentialsProvider(credentialsProvider)

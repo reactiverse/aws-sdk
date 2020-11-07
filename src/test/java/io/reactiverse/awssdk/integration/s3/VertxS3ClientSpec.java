@@ -31,9 +31,12 @@ import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -42,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
-@LocalstackDockerProperties(services = { "s3" }, imageTag = "0.10.2")
+@LocalstackDockerProperties(services = { "s3" }, imageTag = "0.12.2")
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -181,6 +184,28 @@ class VertxS3ClientSpec extends LocalStackBaseSpec {
                 .subscribe(getRes -> ctx.completeNow(), ctx::failNow);
     }
 
+  @Test
+  @Order(8)
+  void listObjectsV2(Vertx vertx, VertxTestContext ctx) throws Exception {
+    final Context originalContext = vertx.getOrCreateContext();
+    final S3AsyncClient s3 = s3(originalContext);
+    single(s3.putObject(b -> putObjectReq(b, "obj1"), AsyncRequestBody.fromString("hello")))
+      .flatMap(putObjectResponse1 -> single(s3.putObject(b -> putObjectReq(b, "obj2"), AsyncRequestBody.fromString("hi"))))
+      .flatMap(putObjectResponse2 -> single(s3.listObjectsV2(VertxS3ClientSpec::listObjectsV2Req))
+        .flatMap(listObjectsV2Response1 -> single(s3.listObjectsV2(b -> listObjectsV2ReqWithContToken(b, listObjectsV2Response1.nextContinuationToken())))
+          .map(listObjectsV2Response2 -> {
+            List<S3Object> allObjects = new ArrayList<>(listObjectsV2Response1.contents());
+            allObjects.addAll(listObjectsV2Response2.contents());
+            return allObjects;
+          })
+        ))
+      .subscribe(allObjects -> {
+        ctx.verify(() -> {
+          assertEquals(3, allObjects.size());
+          ctx.completeNow();
+        });
+      }, ctx::failNow);
+  }
 
     /* Utility methods */
     private static Single<AsyncFile> readFileFromDisk(Vertx vertx) {
@@ -206,5 +231,17 @@ class VertxS3ClientSpec extends LocalStackBaseSpec {
     private static GetObjectRequest.Builder downloadImgReq(GetObjectRequest.Builder gor) {
         return gor.key(IMG_S3_NAME).bucket(BUCKET_NAME);
     }
+
+  private static ListObjectsV2Request.Builder listObjectsV2Req(ListObjectsV2Request.Builder lovr) {
+    return  lovr.maxKeys(2).bucket(BUCKET_NAME);
+  }
+
+  private static ListObjectsV2Request.Builder listObjectsV2ReqWithContToken(ListObjectsV2Request.Builder lovr, String token) {
+    return lovr.maxKeys(2).bucket(BUCKET_NAME).continuationToken(token);
+  }
+
+  private static PutObjectRequest.Builder putObjectReq(PutObjectRequest.Builder por, String key) {
+    return por.bucket(BUCKET_NAME).key(key);
+  }
 
 }
