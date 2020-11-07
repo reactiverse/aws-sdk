@@ -1,6 +1,6 @@
 package io.reactiverse.awssdk.integration.cloudwatch;
 
-import cloud.localstack.docker.LocalstackDocker;
+import cloud.localstack.Localstack;
 import cloud.localstack.docker.LocalstackDockerExtension;
 import cloud.localstack.docker.annotation.LocalstackDockerProperties;
 import io.reactiverse.awssdk.VertxSdkClient;
@@ -23,11 +23,10 @@ import software.amazon.awssdk.services.cloudwatch.model.PutDashboardRequest;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
-@LocalstackDockerProperties(services = { "cloudwatch" }, imageTag = "0.10.2")
+@LocalstackDockerProperties(services = { "cloudwatch" }, imageTag = "0.12.2")
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
 public class VertxCloudWatchClientSpec extends LocalStackBaseSpec {
@@ -85,7 +84,7 @@ public class VertxCloudWatchClientSpec extends LocalStackBaseSpec {
     }
 
     private static CloudWatchAsyncClient cloudwatchClient(Context ctx) throws Exception {
-        final URI cloudwatchURI = new URI(LocalstackDocker.INSTANCE.getEndpointCloudWatch());
+        final URI cloudwatchURI = new URI(Localstack.INSTANCE.getEndpointCloudWatch());
         final CloudWatchAsyncClientBuilder builder =
                 CloudWatchAsyncClient.builder()
                     .credentialsProvider(credentialsProvider)

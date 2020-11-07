@@ -5,3 +5,4 @@ target
 build
 .vertx
 .DS_Store
+.run
