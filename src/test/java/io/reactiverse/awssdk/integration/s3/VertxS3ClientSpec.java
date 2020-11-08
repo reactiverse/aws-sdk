@@ -6,11 +6,17 @@ import io.reactiverse.awssdk.converters.VertxAsyncResponseTransformer;
 import io.reactiverse.awssdk.integration.LocalStackBaseSpec;
 import io.reactiverse.awssdk.reactivestreams.ReadStreamPublisher;
 import io.reactivex.Single;
+import io.vertx.codegen.annotations.Nullable;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageProducer;
 import io.vertx.core.file.OpenOptions;
+import io.vertx.core.streams.Pump;
+import io.vertx.core.streams.WriteStream;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -155,18 +161,50 @@ class VertxS3ClientSpec extends LocalStackBaseSpec {
     void downloadImageFromBucketToPump(Vertx vertx, VertxTestContext ctx) throws Exception {
         final Context originalContext = vertx.getOrCreateContext();
         final S3AsyncClient s3 = s3(originalContext);
-        final String ebAddress = "s3-forwarded";
-        final MessageProducer<Buffer> producer = vertx.eventBus().sender(ebAddress);
-        final Buffer received = Buffer.buffer();
+        Buffer received = Buffer.buffer();
         AtomicBoolean handlerCalled = new AtomicBoolean(false);
-        VertxAsyncResponseTransformer<GetObjectResponse> transformer = new VertxAsyncResponseTransformer<>(producer);
+        VertxAsyncResponseTransformer<GetObjectResponse> transformer = new VertxAsyncResponseTransformer<>(new WriteStream<Buffer>() {
+          @Override
+          public WriteStream<Buffer> exceptionHandler(Handler<Throwable> handler) {
+            return null;
+          }
+
+          @Override
+          public Future<Void> write(Buffer data) {
+            received.appendBuffer(data);
+            return Future.succeededFuture();
+          }
+
+          @Override
+          public void write(Buffer data, Handler<AsyncResult<Void>> handler) {
+            received.appendBuffer(data);
+            handler.handle(null);
+          }
+
+          @Override
+          public void end(Handler<AsyncResult<Void>> handler) {
+            assertTrue(handlerCalled.get(), "Response handler should have been called before first bytes are received");
+            if (received.length() == fileSize) ctx.completeNow();
+            handler.handle(null);
+          }
+
+          @Override
+          public WriteStream<Buffer> setWriteQueueMaxSize(int maxSize) {
+            return null;
+          }
+
+          @Override
+          public boolean writeQueueFull() {
+            return false;
+          }
+
+          @Override
+          public WriteStream<Buffer> drainHandler(@Nullable Handler<Void> handler) {
+            return null;
+          }
+        });
         transformer.setResponseHandler(resp -> {
             handlerCalled.set(true);
-        });
-        vertx.eventBus().<Buffer>consumer(ebAddress, msg -> {
-            assertTrue(handlerCalled.get(), "Response handler should have been called before first bytes are received");
-            received.appendBuffer(msg.body());
-            if (received.length() == fileSize) ctx.completeNow();
         });
         single(s3.getObject(VertxS3ClientSpec::downloadImgReq, transformer))
                 .subscribe(getRes -> {}, ctx::failNow);
@@ -175,11 +213,53 @@ class VertxS3ClientSpec extends LocalStackBaseSpec {
     @Test
     @Order(7)
     void downloadImageFromBucketWithoutSettingResponseHandler(Vertx vertx, VertxTestContext ctx) throws Exception {
-        final Context originalContext = vertx.getOrCreateContext();
-        final S3AsyncClient s3 = s3(originalContext);
-        final String ebAddress = "s3-forwarded";
-        final MessageProducer<Buffer> producer = vertx.eventBus().sender(ebAddress);
-        VertxAsyncResponseTransformer<GetObjectResponse> transformer = new VertxAsyncResponseTransformer<>(producer);
+      final Context originalContext = vertx.getOrCreateContext();
+      final S3AsyncClient s3 = s3(originalContext);
+      final Buffer received = Buffer.buffer();
+      AtomicBoolean handlerCalled = new AtomicBoolean(false);
+      VertxAsyncResponseTransformer<GetObjectResponse> transformer = new VertxAsyncResponseTransformer<>(new WriteStream<Buffer>() {
+          @Override
+          public WriteStream<Buffer> exceptionHandler(Handler<Throwable> handler) {
+            return null;
+          }
+
+          @Override
+          public Future<Void> write(Buffer data) {
+            received.appendBuffer(data);
+            return Future.succeededFuture();
+          }
+
+          @Override
+          public void write(Buffer data, Handler<AsyncResult<Void>> handler) {
+            received.appendBuffer(data);
+            handler.handle(null);
+          }
+
+          @Override
+          public void end(Handler<AsyncResult<Void>> handler) {
+            assertTrue(handlerCalled.get(), "Response handler should have been called before first bytes are received");
+            if (received.length() == fileSize) ctx.completeNow();
+            handler.handle(null);
+          }
+
+          @Override
+          public WriteStream<Buffer> setWriteQueueMaxSize(int maxSize) {
+            return null;
+          }
+
+          @Override
+          public boolean writeQueueFull() {
+            return false;
+          }
+
+          @Override
+          public WriteStream<Buffer> drainHandler(@Nullable Handler<Void> handler) {
+            return null;
+          }
+        });
+        transformer.setResponseHandler(resp -> {
+          handlerCalled.set(true);
+        });
         single(s3.getObject(VertxS3ClientSpec::downloadImgReq, transformer))
                 .subscribe(getRes -> ctx.completeNow(), ctx::failNow);
     }

@@ -59,7 +59,7 @@ class RetryContextTest {
                     }
 
                 })
-                .listen(ctx.completing());
+                .listen(ctx.succeedingThenComplete());
     }
 
     @Test

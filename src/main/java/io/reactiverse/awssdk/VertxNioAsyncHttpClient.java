@@ -21,7 +21,10 @@ import software.amazon.awssdk.http.async.SdkHttpContentPublisher;
 import software.amazon.awssdk.utils.StringUtils;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
@@ -66,42 +69,49 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
     void executeOnContext(AsyncExecuteRequest asyncExecuteRequest, CompletableFuture<Void> fut) {
         final SdkHttpRequest request = asyncExecuteRequest.request();
         final SdkAsyncHttpResponseHandler responseHandler = asyncExecuteRequest.responseHandler();
-
-        final HttpMethod method = MethodConverter.awsToVertx(request.method());
         final RequestOptions options = getRequestOptions(request);
-        final HttpClientRequest vRequest = client.request(method, options).setFollowRedirects(true);
-        request.headers().forEach((headerName, headerValues) ->
-                vRequest.putHeader(headerName, String.join(",", headerValues))
-        );
-        vRequest.putHeader(HttpHeaders.CONNECTION, HttpHeaders.KEEP_ALIVE);
-        vRequest.exceptionHandler(error -> {
+        client.request(options, ar -> {
+          if (ar.failed()) {
+            responseHandler.onError(ar.cause());
+            return;
+          }
+          HttpClientRequest vRequest = ar.result();
+          vRequest.onFailure(error -> {
             responseHandler.onError(error);
             fut.completeExceptionally(error);
-        });
-        vRequest.handler(vResponse -> {
+          });
+          vRequest.onSuccess(vResponse -> {
             final SdkHttpFullResponse.Builder builder = SdkHttpResponse.builder()
-                    .statusCode(vResponse.statusCode())
-                    .statusText(vResponse.statusMessage());
+              .statusCode(vResponse.statusCode())
+              .statusText(vResponse.statusMessage());
             vResponse.headers().forEach(e ->
-                    builder.appendHeader(e.getKey(), e.getValue())
+              builder.appendHeader(e.getKey(), e.getValue())
             );
             responseHandler.onHeaders(builder.build());
             responseHandler.onStream(new ReadStreamPublisher<>(vResponse, fut));
-        });
-        final SdkHttpContentPublisher publisher = asyncExecuteRequest.requestContentPublisher();
-        if (publisher != null) {
+          });
+          final SdkHttpContentPublisher publisher = asyncExecuteRequest.requestContentPublisher();
+          if (publisher != null) {
             publisher.subscribe(new HttpClientRequestSubscriber(vRequest));
-        } else {
+          } else {
             vRequest.end();
-        }
+          }
+        });
     }
 
   private static RequestOptions getRequestOptions(SdkHttpRequest request) {
-    return new RequestOptions()
+    RequestOptions options =  new RequestOptions()
+      .setMethod(MethodConverter.awsToVertx(request.method()))
       .setHost(request.host())
       .setPort(request.port())
       .setURI(createRelativeUri(request.getUri()))
+      .setFollowRedirects(true)
       .setSsl("https".equals(request.protocol()));
+    request.headers().forEach((name, values) -> {
+      options.addHeader(name, values.stream().map(s -> (CharSequence)s).collect(Collectors.toList()));
+    });
+    options.addHeader(HttpHeaders.CONNECTION, HttpHeaders.KEEP_ALIVE);
+    return options;
   }
 
   private static String createRelativeUri(URI uri) {
