@@ -1,11 +1,11 @@
-val vertxVersion = "3.9.4"
+val vertxVersion = "4.0.0.CR1"
 val awsSdkVersion = "2.15.23"
 val junit5Version = "5.4.0"
 val logbackVersion = "1.2.3"
 val integrationOption = "tests.integration"
 
 group = "io.reactiverse"
-version = "0.7.0"
+version = "1.0.0-SNAPSHOT"
 
 plugins {
     `java-library`
@@ -136,7 +136,7 @@ tasks {
         (options as StandardJavadocDocletOptions).links(
             "https://docs.oracle.com/javase/8/docs/api/",
             "https://sdk.amazonaws.com/java/api/latest/",
-            "https://vertx.io/docs/${vertxVersion}/apidocs/",
+            "https://vertx.io/docs/apidocs/",
             "http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/",
             "https://netty.io/4.1/api/"
         )
