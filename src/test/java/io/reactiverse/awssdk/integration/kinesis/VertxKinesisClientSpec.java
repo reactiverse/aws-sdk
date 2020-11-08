@@ -1,6 +1,6 @@
 package io.reactiverse.awssdk.integration.kinesis;
 
-import cloud.localstack.docker.LocalstackDocker;
+import cloud.localstack.Localstack;
 import cloud.localstack.docker.LocalstackDockerExtension;
 import cloud.localstack.docker.annotation.LocalstackDockerProperties;
 import io.reactiverse.awssdk.VertxSdkClient;
@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
-@LocalstackDockerProperties(services = { "kinesis" }, imageTag = "0.10.2")
+@LocalstackDockerProperties(services = { "kinesis" }, imageTag = "0.12.2")
 public class VertxKinesisClientSpec extends LocalStackBaseSpec {
 
     private final static String STREAM = "my-awesome-stream";
@@ -61,7 +61,7 @@ public class VertxKinesisClientSpec extends LocalStackBaseSpec {
         KinesisClient client = KinesisClient.builder()
                 .region(Region.EU_WEST_1)
                 .credentialsProvider(credentialsProvider)
-                .endpointOverride(new URI(LocalstackDocker.INSTANCE.getEndpointKinesis()))
+                .endpointOverride(new URI(Localstack.INSTANCE.getEndpointKinesis()))
                 .build();
         CreateStreamResponse resp = client.createStream(cs -> cs.streamName(STREAM).shardCount(1));
         assertNotNull(resp);
@@ -149,7 +149,7 @@ public class VertxKinesisClientSpec extends LocalStackBaseSpec {
     }
 
     private KinesisAsyncClient kinesis(Context context) throws Exception {
-        final URI kinesisURI = new URI(LocalstackDocker.INSTANCE.getEndpointKinesis());
+        final URI kinesisURI = new URI(Localstack.INSTANCE.getEndpointKinesis());
         final KinesisAsyncClientBuilder builder = KinesisAsyncClient.builder()
                 .region(Region.EU_WEST_1)
                 .endpointOverride(kinesisURI)

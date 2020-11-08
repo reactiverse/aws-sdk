@@ -4,11 +4,20 @@
 
 This project provides a `VertxNioAsyncHttpClient` and a `VertxExecutor` so that you can use AWS SDK v2 in a Vert.x context.
 
+## Coordinates
+
+Artifacts are published [here](https://search.maven.org/artifact/io.reactiverse/aws-sdk)
+
 ## Version compatibility matrix
 
 | Project | Vert.x | AWS sdk |
 | ------- | ------ | ------- |
-|  0.0.1  | 3.8.0  | 2.7.8   |
+|  0.7.0  | 3.9.4  | 2.15.23 |
+|  0.6.0  | 3.9.2  | 2.14.7  |
+|  0.5.1  | 3.9.2  | 2.13.6  |
+|  0.5.0  | 3.9.0  | 2.12.0  |
+|  0.4.0  | 3.8.3  | 2.10.16 |
+|  0.3.0  | 3.8.1  | 2.7.8   |
 
 ## Documentation
 

@@ -1,6 +1,8 @@
 out
 .gradle
 .idea
+target
 build
 .vertx
 .DS_Store
+.run

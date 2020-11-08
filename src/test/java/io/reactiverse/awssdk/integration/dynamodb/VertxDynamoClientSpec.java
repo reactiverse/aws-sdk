@@ -1,6 +1,6 @@
 package io.reactiverse.awssdk.integration.dynamodb;
 
-import cloud.localstack.docker.LocalstackDocker;
+import cloud.localstack.Localstack;
 import cloud.localstack.docker.LocalstackDockerExtension;
 import cloud.localstack.docker.annotation.LocalstackDockerProperties;
 import io.reactiverse.awssdk.VertxSdkClient;
@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
-@LocalstackDockerProperties(services = { "dynamodb" }, imageTag = "0.10.2")
+@LocalstackDockerProperties(services = { "dynamodb" }, imageTag = "0.12.2")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class VertxDynamoClientSpec extends LocalStackBaseSpec {
 
@@ -136,7 +136,7 @@ public class VertxDynamoClientSpec extends LocalStackBaseSpec {
     }
 
     private DynamoDbAsyncClient dynamo(Context context) throws Exception {
-        final URI dynamoEndpoint = new URI(LocalstackDocker.INSTANCE.getEndpointDynamoDB());
+        final URI dynamoEndpoint = new URI(Localstack.INSTANCE.getEndpointDynamoDB());
         return VertxSdkClient.withVertx(
                 DynamoDbAsyncClient.builder()
                         .region(Region.EU_WEST_1)
