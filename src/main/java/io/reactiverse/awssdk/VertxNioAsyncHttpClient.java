@@ -8,6 +8,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.RequestOptions;
@@ -76,11 +77,13 @@ public class VertxNioAsyncHttpClient implements SdkAsyncHttpClient {
             return;
           }
           HttpClientRequest vRequest = ar.result();
-          vRequest.onFailure(error -> {
-            responseHandler.onError(error);
-            fut.completeExceptionally(error);
-          });
-          vRequest.onSuccess(vResponse -> {
+          vRequest.response(res -> {
+            if (res.failed()) {
+              responseHandler.onError(res.cause());
+              fut.completeExceptionally(res.cause());
+              return;
+            }
+            HttpClientResponse vResponse = res.result();
             final SdkHttpFullResponse.Builder builder = SdkHttpResponse.builder()
               .statusCode(vResponse.statusCode())
               .statusText(vResponse.statusMessage());
