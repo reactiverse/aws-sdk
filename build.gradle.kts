@@ -1,11 +1,11 @@
-val vertxVersion = "3.9.4"
-val awsSdkVersion = "2.15.23"
-val junit5Version = "5.4.0"
+val vertxVersion = "4.0.0"
+val awsSdkVersion = "2.15.45"
+val junit5Version = "5.7.0"
 val logbackVersion = "1.2.3"
 val integrationOption = "tests.integration"
 
 group = "io.reactiverse"
-version = "0.7.0"
+version = "1.0.0"
 
 plugins {
     `java-library`
@@ -72,8 +72,7 @@ dependencies {
     testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
     testImplementation("ch.qos.logback:logback-core:$logbackVersion")
     testImplementation("software.amazon.awssdk:aws-sdk-java:$awsSdkVersion")
-
-    testCompile("org.junit.jupiter:junit-jupiter-engine:$junit5Version")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:$junit5Version")
 }
 
 java {
