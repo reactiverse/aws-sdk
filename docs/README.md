@@ -13,14 +13,14 @@ Using maven:
 ```
 <dependency>
     <groupId>io.reactiverse</groupId>
-    <artifactId>vertx-aws-sdk</artifactId>
-    <version>0.3.0</version>
+    <artifactId>aws-sdk</artifactId>
+    <version>1.0.0</version>
 </dependency>
 ```
 
 Using Gradle:
 ```
-implementation("io.reactiverse:vertx-aws-sdk:0.3.0")
+implementation("io.reactiverse:aws-sdk:1.0.0")
 ```
 
 ## How-to
