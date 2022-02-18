@@ -23,9 +23,9 @@ jobs:
         run: echo ::set-output name=VERSION::$(gradle properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')
 
       - name: Publish Release to Sonatype
+        uses: gradle/gradle-build-action@v2
         with:
           gradle-version: 7.4
-          uses: gradle/gradle-build-action@v2
           arguments: assemble publish -PossrhUsername=${{secrets.SONATYPE_NEXUS_USERNAME}} -PossrhPassword=${{secrets.SONATYPE_NEXUS_PASSWORD}}
 
       - name: Create Release in Github
