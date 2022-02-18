@@ -19,8 +19,8 @@ jobs:
       - name: Release to Bintray
         uses: eskatos/gradle-command-action@v1
         with:
-          gradle-version: 6.5
-          arguments: test bintrayUpload
+          gradle-version: 7.5
+          arguments: test bintrayUpload # FIXME!!
         env:
           BINTRAY_USER: ${{secrets.BINTRAY_USER}}
           BINTRAY_KEY: ${{secrets.BINTRAY_KEY}}

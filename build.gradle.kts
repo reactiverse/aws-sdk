@@ -5,16 +5,15 @@ val logbackVersion = "1.2.3"
 val integrationOption = "tests.integration"
 
 group = "io.reactiverse"
-version = "1.0.0"
+version = "1.1.0"
 
 plugins {
     `java-library`
     `maven-publish`
+    signing
     jacoco
-    id("com.jfrog.bintray") version "1.8.5"
-    id("com.jaredsburrows.license") version "0.8.42"
-    id("org.sonarqube") version "3.0"
-    id("com.github.ben-manes.versions") version "0.34.0"
+    id("org.sonarqube") version "3.3"
+    id("com.github.ben-manes.versions") version "0.42.0"
 }
 
 // In order to publish SNAPSHOTs to Sonatype Snapshots repository => the CI should define such `ossrhUsername` and `ossrhPassword` properties
@@ -27,26 +26,7 @@ if (!project.hasProperty("ossrhPassword")) {
     project.extra["ossrhPassword"] = "bar"
 }
 
-// Releases are published to Bintray under the Reactiverse organization
-// Then manually synced to Central
-bintray {
-    user    = System.getenv("BINTRAY_USER")
-    key     = System.getenv("BINTRAY_KEY")
-    with(pkg) {
-        userOrg = "reactiverse"
-        repo = "releases"
-        name = project.name
-        setLicenses("Apache-2.0")
-        vcsUrl = "https://github.com/reactiverse/aws-sdk"
-        setLabels("vertx", "vert.x", "aws-sdk", "amazon web services")
-        publicDownloadNumbers = true
-        with(version) {
-            name = project.version.toString()
-            description = "${project.description}. Version: ${project.version}"
-        }
-        setPublications("mavenJava")
-    }
-}
+extra["isReleaseVersion"] = !version.toString().endsWith("SNAPSHOT")
 
 repositories {
     mavenCentral()
@@ -81,7 +61,7 @@ java {
 }
 
 jacoco {
-    toolVersion = "0.8.5"
+    toolVersion = "0.8.7"
 }
 
 tasks {
@@ -94,9 +74,9 @@ tasks {
     jacocoTestReport {
         dependsOn(":test")
         reports {
-            xml.isEnabled = true
-            csv.isEnabled = false
-            html.destination = file("$buildDir/jacocoHtml")
+            xml.required.set(true)
+            csv.required.set(false)
+            html.outputLocation.set(file("$buildDir/jacocoHtml"))
         }
     }
 
@@ -141,8 +121,12 @@ tasks {
         )
     }
 
+    withType<Sign> {
+      onlyIf { project.extra["isReleaseVersion"] as Boolean }
+    }
+
     withType<Wrapper> {
-        gradleVersion = "6.5"
+        gradleVersion = "7.4"
     }
 }
 
