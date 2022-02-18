@@ -165,23 +165,30 @@ publishing {
                 }
             }
             repositories {
-                // To locally check out the poms
-                maven {
-                    name = "BuildDir"
-                    url = uri("$buildDir/repos/snapshots")
+              // To locally check out the poms
+              maven {
+                val releasesRepoUrl = uri("$buildDir/repos/releases")
+                val snapshotsRepoUrl = uri("$buildDir/repos/snapshots")
+                name = "BuildDir"
+                url = if (project.extra["isReleaseVersion"] as Boolean) releasesRepoUrl else snapshotsRepoUrl
+              }
+              maven {
+                val releasesRepoUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+                val snapshotsRepoUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+                name = "SonatypeOSS"
+                url = if (project.extra["isReleaseVersion"] as Boolean) releasesRepoUrl else snapshotsRepoUrl
+                credentials {
+                  val ossrhUsername: String by project
+                  val ossrhPassword: String by project
+                  username = ossrhUsername
+                  password = ossrhPassword
                 }
-                // Snapshots are published to Sonatype's repository directly
-                maven {
-                    name = "SonatypeOSS"
-                    url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-                    credentials {
-                        val ossrhUsername: String by project
-                        val ossrhPassword: String by project
-                        username = ossrhUsername
-                        password = ossrhPassword
-                    }
-                }
+              }
             }
         }
     }
+}
+
+signing {
+  sign(publishing.publications["mavenJava"])
 }
