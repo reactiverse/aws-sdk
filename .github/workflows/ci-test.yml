@@ -16,7 +16,7 @@ jobs:
           java-version: ${{ matrix.java }}
 
       - name: Pre-Pull localstack image
-        run: "docker pull localstack/localstack:0.2.20"
+        run: "docker pull localstack/localstack:0.14"
 
 
       - uses: gradle/gradle-build-action@v2

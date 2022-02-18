@@ -21,7 +21,8 @@ jobs:
         with:
           gradle-version: 7.4
 
-      - name: Get Project version
+      - uses: actions/checkout@v2
+        name: Get Project version
         id: get_version
         run: echo ::set-output name=VERSION::$(gradle properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')
 
