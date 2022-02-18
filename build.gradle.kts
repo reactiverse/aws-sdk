@@ -1,5 +1,5 @@
 val vertxVersion = "4.2.4"
-val awsSdkVersion = "2.15.45"
+val awsSdkVersion = "2.17.129"
 val junit5Version = "5.8.2"
 val logbackVersion = "1.2.10"
 val integrationOption = "tests.integration"
@@ -126,7 +126,11 @@ tasks {
     }
 
     withType<Wrapper> {
-        gradleVersion = "7.4"
+      gradleVersion = "7.4"
+    }
+
+    withType<JavaCompile> {
+      options.compilerArgs.add("-Xlint:deprecation")
     }
 }
 
