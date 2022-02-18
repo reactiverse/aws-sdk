@@ -5,7 +5,7 @@ val logbackVersion = "1.2.10"
 val integrationOption = "tests.integration"
 
 group = "io.reactiverse"
-version = "1.1.0"
+version = "1.1.0-SNAPSHOT"
 
 plugins {
     `java-library`
