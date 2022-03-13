@@ -88,7 +88,7 @@ public class VertxFirehoseClientSpec extends LocalStackBaseSpec {
         CreateDeliveryStreamResponse resp = firehoseSync.createDeliveryStream(cs ->
                 cs.deliveryStreamName(STREAM)
                     .deliveryStreamType(STREAM_TYPE)
-                    .s3DestinationConfiguration(dest ->
+                    .extendedS3DestinationConfiguration(dest ->
                         dest.bucketARN("arn:aws:s3:::" + BUCKET)
                     )
         );

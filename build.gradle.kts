@@ -1,20 +1,19 @@
-val vertxVersion = "4.0.0"
-val awsSdkVersion = "2.15.45"
-val junit5Version = "5.7.0"
-val logbackVersion = "1.2.3"
+val vertxVersion = "4.2.4"
+val awsSdkVersion = "2.17.129"
+val junit5Version = "5.8.2"
+val logbackVersion = "1.2.10"
 val integrationOption = "tests.integration"
 
 group = "io.reactiverse"
-version = "1.0.0"
+version = "1.1.0-SNAPSHOT"
 
 plugins {
     `java-library`
     `maven-publish`
+    signing
     jacoco
-    id("com.jfrog.bintray") version "1.8.5"
-    id("com.jaredsburrows.license") version "0.8.42"
-    id("org.sonarqube") version "3.0"
-    id("com.github.ben-manes.versions") version "0.34.0"
+    id("org.sonarqube") version "3.3"
+    id("com.github.ben-manes.versions") version "0.42.0"
 }
 
 // In order to publish SNAPSHOTs to Sonatype Snapshots repository => the CI should define such `ossrhUsername` and `ossrhPassword` properties
@@ -27,26 +26,7 @@ if (!project.hasProperty("ossrhPassword")) {
     project.extra["ossrhPassword"] = "bar"
 }
 
-// Releases are published to Bintray under the Reactiverse organization
-// Then manually synced to Central
-bintray {
-    user    = System.getenv("BINTRAY_USER")
-    key     = System.getenv("BINTRAY_KEY")
-    with(pkg) {
-        userOrg = "reactiverse"
-        repo = "releases"
-        name = project.name
-        setLicenses("Apache-2.0")
-        vcsUrl = "https://github.com/reactiverse/aws-sdk"
-        setLabels("vertx", "vert.x", "aws-sdk", "amazon web services")
-        publicDownloadNumbers = true
-        with(version) {
-            name = project.version.toString()
-            description = "${project.description}. Version: ${project.version}"
-        }
-        setPublications("mavenJava")
-    }
-}
+extra["isReleaseVersion"] = !version.toString().endsWith("SNAPSHOT")
 
 repositories {
     mavenCentral()
@@ -68,7 +48,7 @@ dependencies {
 
     testImplementation("io.vertx:vertx-junit5:$vertxVersion")
     testImplementation("io.vertx:vertx-rx-java2:$vertxVersion")
-    testImplementation("cloud.localstack:localstack-utils:0.2.5")
+    testImplementation("cloud.localstack:localstack-utils:0.2.20")
     testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
     testImplementation("ch.qos.logback:logback-core:$logbackVersion")
     testImplementation("software.amazon.awssdk:aws-sdk-java:$awsSdkVersion")
@@ -81,7 +61,7 @@ java {
 }
 
 jacoco {
-    toolVersion = "0.8.5"
+    toolVersion = "0.8.7"
 }
 
 tasks {
@@ -94,9 +74,9 @@ tasks {
     jacocoTestReport {
         dependsOn(":test")
         reports {
-            xml.isEnabled = true
-            csv.isEnabled = false
-            html.destination = file("$buildDir/jacocoHtml")
+            xml.required.set(true)
+            csv.required.set(false)
+            html.outputLocation.set(file("$buildDir/jacocoHtml"))
         }
     }
 
@@ -141,8 +121,16 @@ tasks {
         )
     }
 
+    withType<Sign> {
+      onlyIf { project.extra["isReleaseVersion"] as Boolean }
+    }
+
     withType<Wrapper> {
-        gradleVersion = "6.5"
+      gradleVersion = "7.4"
+    }
+
+    withType<JavaCompile> {
+      options.compilerArgs.add("-Xlint:deprecation")
     }
 }
 
@@ -177,23 +165,30 @@ publishing {
                 }
             }
             repositories {
-                // To locally check out the poms
-                maven {
-                    name = "BuildDir"
-                    url = uri("$buildDir/repos/snapshots")
+              // To locally check out the poms
+              maven {
+                val releasesRepoUrl = uri("$buildDir/repos/releases")
+                val snapshotsRepoUrl = uri("$buildDir/repos/snapshots")
+                name = "BuildDir"
+                url = if (project.extra["isReleaseVersion"] as Boolean) releasesRepoUrl else snapshotsRepoUrl
+              }
+              maven {
+                val releasesRepoUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+                val snapshotsRepoUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+                name = "SonatypeOSS"
+                url = if (project.extra["isReleaseVersion"] as Boolean) releasesRepoUrl else snapshotsRepoUrl
+                credentials {
+                  val ossrhUsername: String by project
+                  val ossrhPassword: String by project
+                  username = ossrhUsername
+                  password = ossrhPassword
                 }
-                // Snapshots are published to Sonatype's repository directly
-                maven {
-                    name = "SonatypeOSS"
-                    url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-                    credentials {
-                        val ossrhUsername: String by project
-                        val ossrhPassword: String by project
-                        username = ossrhUsername
-                        password = ossrhPassword
-                    }
-                }
+              }
             }
         }
     }
+}
+
+signing {
+  sign(publishing.publications["mavenJava"])
 }
