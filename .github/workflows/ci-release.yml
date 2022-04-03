@@ -27,14 +27,15 @@ jobs:
 
       - name: Decode
         run: |
-          echo "${{secrets.SIGNING_SECRET_KEY_RING_FILE}}" > ~/.gradle/secring.gpg.b64
-          base64 -d ~/.gradle/secring.gpg.b64 > ~/.gradle/secring.gpg
+          echo "${{secrets.SIGNING_SECRET_KEY_RING_FILE}}" > /tmp/secring.gpg.b64
+          base64 -d /tmp/secring.gpg.b64 > /tmp/secring.gpg
 
       - name: Publish Release to Sonatype
         uses: gradle/gradle-build-action@v2
         with:
           gradle-version: 7.4
-          arguments: assemble publish -Psigning.keyId=${{secrets.SIGNING_KEY_ID}} -Psigning.password=${{secrets.SIGNING_PASSWORD}} -Psigning.secretKeyRingFile=.gradle/secring.gpg -PossrhUsername=${{secrets.SONATYPE_NEXUS_USERNAME}} -PossrhPassword=${{secrets.SONATYPE_NEXUS_PASSWORD}} --stacktrace
+          arguments: assemble publish -Psigning.keyId=${{secrets.SIGNING_KEY_ID}} -Psigning.password=${{secrets.SIGNING_PASSWORD}} -Psigning.secretKeyRingFile=/tmp/secring.gpg) -PossrhUsername=${{secrets.SONATYPE_NEXUS_USERNAME}} 
+-PossrhPassword=${{secrets.SONATYPE_NEXUS_PASSWORD}} --stacktrace
 
       - name: Create Release in Github
         uses: actions/create-release@latest
