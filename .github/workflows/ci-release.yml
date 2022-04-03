@@ -34,8 +34,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           gradle-version: 7.4
-          arguments: assemble publish -Psigning.keyId=${{secrets.SIGNING_KEY_ID}} -Psigning.password=${{secrets.SIGNING_PASSWORD}} -Psigning.secretKeyRingFile=/tmp/secring.gpg -PossrhUsername=${{secrets.SONATYPE_NEXUS_USERNAME}} 
--PossrhPassword=${{secrets.SONATYPE_NEXUS_PASSWORD}} --stacktrace
+          arguments: assemble publish -Psigning.keyId=${{secrets.SIGNING_KEY_ID}} -Psigning.password=${{secrets.SIGNING_PASSWORD}} -Psigning.secretKeyRingFile=/tmp/secring.gpg -PossrhUsername=${{secrets.SONATYPE_NEXUS_USERNAME}} -PossrhPassword=${{secrets.SONATYPE_NEXUS_PASSWORD}} --stacktrace
 
       - name: Create Release in Github
         uses: actions/create-release@latest
