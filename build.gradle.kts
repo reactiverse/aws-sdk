@@ -1,5 +1,5 @@
 val vertxVersion = "4.4.0"
-val awsSdkVersion = "2.1109.0"
+val awsSdkVersion = "2.20.22"
 val junit5Version = "5.8.2"
 val logbackVersion = "1.2.10"
 val integrationOption = "tests.integration"
