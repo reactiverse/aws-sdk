@@ -5,7 +5,7 @@ val logbackVersion = "1.2.10"
 val integrationOption = "tests.integration"
 
 group = "io.reactiverse"
-version = "1.1.0"
+version = "1.1.0-SNAPSHOT"
 
 plugins {
     `java-library`
@@ -121,9 +121,9 @@ tasks {
         )
     }
 
-//    withType<Sign> {
-//      onlyIf { project.extra["isReleaseVersion"] as Boolean }
-//    }
+    withType<Sign> {
+      onlyIf { project.extra["isReleaseVersion"] as Boolean }
+    }
 
     withType<Wrapper> {
       gradleVersion = "7.4"

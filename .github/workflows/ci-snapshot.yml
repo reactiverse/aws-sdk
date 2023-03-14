@@ -25,7 +25,12 @@ jobs:
         id: get_version
         run: echo ::set-output name=VERSION::$(gradle properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')
 
-      - name: Publish Release to Sonatype
+      - name: Decode
+        run: |
+          echo "${{secrets.SIGNING_SECRET_KEY_RING_FILE}}" > /tmp/secring.gpg.b64
+          base64 -d /tmp/secring.gpg.b64 > /tmp/secring.gpg
+
+      - name: Publish Snapshot to Sonatype
         uses: gradle/gradle-build-action@v2
         with:
           gradle-version: 7.4
