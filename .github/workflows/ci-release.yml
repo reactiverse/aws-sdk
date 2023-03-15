@@ -20,7 +20,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
         with:
-          gradle-version: 8.0
+          gradle-version: stable
 
       - name: Get Project version
         id: get_version
@@ -34,7 +34,7 @@ jobs:
       - name: Publish Release to Sonatype
         uses: gradle/gradle-build-action@v2
         with:
-          gradle-version: 8.0
+          gradle-version: stable
           arguments: assemble publish -Psigning.keyId=${{secrets.SIGNING_KEY_ID}} -Psigning.password=${{secrets.SIGNING_PASSWORD}} -Psigning.secretKeyRingFile=/tmp/secring.gpg -PossrhUsername=${{secrets.SONATYPE_NEXUS_USERNAME}} -PossrhPassword=${{secrets.SONATYPE_NEXUS_PASSWORD}} --stacktrace
 
       - name: Create Release in Github
