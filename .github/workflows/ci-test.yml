@@ -22,5 +22,5 @@ jobs:
 
       - uses: gradle/gradle-build-action@v2
         with:
-          gradle-version: stable
+          gradle-version: current
           arguments: test -Dtests.integration=localstack
