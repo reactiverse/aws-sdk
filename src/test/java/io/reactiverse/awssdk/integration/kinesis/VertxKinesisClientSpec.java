@@ -1,6 +1,7 @@
 package io.reactiverse.awssdk.integration.kinesis;
 
 import cloud.localstack.Localstack;
+import cloud.localstack.ServiceName;
 import cloud.localstack.docker.LocalstackDockerExtension;
 import cloud.localstack.docker.annotation.LocalstackDockerProperties;
 import io.reactiverse.awssdk.VertxSdkClient;
@@ -41,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
-@LocalstackDockerProperties(services = { "kinesis" }, imageTag = "0.12.2")
+@LocalstackDockerProperties(services = { ServiceName.KINESIS }, imageTag = "1.4.0")
 public class VertxKinesisClientSpec extends LocalStackBaseSpec {
 
     private final static String STREAM = "my-awesome-stream";

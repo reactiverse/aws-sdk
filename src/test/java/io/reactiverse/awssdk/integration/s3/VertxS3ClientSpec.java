@@ -1,5 +1,6 @@
 package io.reactiverse.awssdk.integration.s3;
 
+import cloud.localstack.ServiceName;
 import cloud.localstack.docker.LocalstackDockerExtension;
 import cloud.localstack.docker.annotation.LocalstackDockerProperties;
 import io.reactiverse.awssdk.converters.VertxAsyncResponseTransformer;
@@ -51,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
-@LocalstackDockerProperties(services = { "s3" }, imageTag = "0.12.2")
+@LocalstackDockerProperties(services = { ServiceName.S3 }, imageTag = "1.4.0")
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)

@@ -2,6 +2,7 @@ val vertxVersion = "4.4.0"
 val awsSdkVersion = "2.20.22"
 val junit5Version = "5.8.2"
 val logbackVersion = "1.2.10"
+val localstackVersion = "0.2.22"
 val integrationOption = "tests.integration"
 
 group = "io.reactiverse"
@@ -48,7 +49,7 @@ dependencies {
 
     testImplementation("io.vertx:vertx-junit5:$vertxVersion")
     testImplementation("io.vertx:vertx-rx-java2:$vertxVersion")
-    testImplementation("cloud.localstack:localstack-utils:0.2.20")
+    testImplementation("cloud.localstack:localstack-utils:$localstackVersion")
     testImplementation("ch.qos.logback:logback-classic:$logbackVersion")
     testImplementation("ch.qos.logback:logback-core:$logbackVersion")
     testImplementation("software.amazon.awssdk:aws-sdk-java:$awsSdkVersion")
@@ -126,7 +127,7 @@ tasks {
 //    }
 
     withType<Wrapper> {
-      gradleVersion = "7.4"
+      gradleVersion = "8.0"
     }
 
     withType<JavaCompile> {
