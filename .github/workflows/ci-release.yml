@@ -45,7 +45,7 @@ jobs:
           tag_name: ${{ steps.get_version.outputs.VERSION }}
           release_name: ${{ steps.get_version.outputs.VERSION }}
           body: |
-            Available in Sonatype SNAPSHOTs repository under:
+            Available in Sonatype repository under:
             `io.reactiverse:aws-sdk:${{ steps.get_version.outputs.VERSION }}`
           draft: false
           prerelease: false

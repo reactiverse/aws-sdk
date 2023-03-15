@@ -122,9 +122,9 @@ tasks {
         )
     }
 
-//    withType<Sign> {
-//      onlyIf { project.extra["isReleaseVersion"] as Boolean }
-//    }
+    withType<Sign> {
+      onlyIf { project.extra["isReleaseVersion"] as Boolean }
+    }
 
     withType<Wrapper> {
       gradleVersion = "8.0"
