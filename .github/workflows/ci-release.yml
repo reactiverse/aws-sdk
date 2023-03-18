@@ -46,6 +46,6 @@ jobs:
           release_name: ${{ steps.get_version.outputs.VERSION }}
           body: |
             Available in Sonatype repository under:
-            `io.reactiverse:aws-sdk:${{ steps.get_version.outputs.VERSION }}`
+            [`io.reactiverse:aws-sdk:${{ steps.get_version.outputs.VERSION }}`](https://central.sonatype.com/artifact/io.reactiverse/aws-sdk/${{ steps.get_version.outputs.VERSION }})
           draft: false
           prerelease: false
