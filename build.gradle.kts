@@ -6,7 +6,7 @@ val localstackVersion = "0.2.22"
 val integrationOption = "tests.integration"
 
 group = "io.reactiverse"
-version = "1.2.0-SNAPSHOT"
+version = "1.2.0"
 
 plugins {
     `java-library`
