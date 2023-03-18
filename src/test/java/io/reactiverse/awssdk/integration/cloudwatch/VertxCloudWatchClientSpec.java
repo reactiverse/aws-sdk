@@ -1,6 +1,7 @@
 package io.reactiverse.awssdk.integration.cloudwatch;
 
 import cloud.localstack.Localstack;
+import cloud.localstack.ServiceName;
 import cloud.localstack.docker.LocalstackDockerExtension;
 import cloud.localstack.docker.annotation.LocalstackDockerProperties;
 import io.reactiverse.awssdk.VertxSdkClient;
@@ -26,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
-@LocalstackDockerProperties(services = { "cloudwatch" }, imageTag = "0.12.2")
+@LocalstackDockerProperties(services = { ServiceName.CLOUDWATCH }, imageTag = "1.4.0")
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
 public class VertxCloudWatchClientSpec extends LocalStackBaseSpec {

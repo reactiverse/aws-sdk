@@ -1,6 +1,7 @@
 package io.reactiverse.awssdk.integration.lambda;
 
 import cloud.localstack.Localstack;
+import cloud.localstack.ServiceName;
 import cloud.localstack.docker.LocalstackDockerExtension;
 import cloud.localstack.docker.annotation.LocalstackDockerProperties;
 import io.reactiverse.awssdk.VertxSdkClient;
@@ -38,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
-@LocalstackDockerProperties(services = { "lambda" }, imageTag = "0.12.2")
+@LocalstackDockerProperties(services = { ServiceName.LAMBDA }, imageTag = "1.4.0")
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)

@@ -1,6 +1,7 @@
 package io.reactiverse.awssdk.integration.apigateway;
 
 import cloud.localstack.Localstack;
+import cloud.localstack.ServiceName;
 import cloud.localstack.docker.LocalstackDockerExtension;
 import cloud.localstack.docker.annotation.LocalstackDockerProperties;
 import io.reactiverse.awssdk.VertxSdkClient;
@@ -40,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
-@LocalstackDockerProperties(services = { "apigateway" }, imageTag = "0.12.2")
+@LocalstackDockerProperties(services = { ServiceName.API_GATEWAY }, imageTag = "1.4.0")
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
 public class VertxApiGatewaySpec extends LocalStackBaseSpec {

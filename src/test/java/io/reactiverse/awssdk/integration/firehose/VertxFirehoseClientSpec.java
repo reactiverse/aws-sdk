@@ -1,6 +1,7 @@
 package io.reactiverse.awssdk.integration.firehose;
 
 import cloud.localstack.Localstack;
+import cloud.localstack.ServiceName;
 import cloud.localstack.docker.LocalstackDockerExtension;
 import cloud.localstack.docker.annotation.LocalstackDockerProperties;
 import io.reactiverse.awssdk.VertxSdkClient;
@@ -52,7 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(VertxExtension.class)
 @ExtendWith(LocalstackDockerExtension.class)
 @EnabledIfSystemProperty(named = "tests.integration", matches = "localstack")
-@LocalstackDockerProperties(services = { "firehose", "s3" }, imageTag = "0.12.2")
+@LocalstackDockerProperties(services = { ServiceName.FIREHOSE, ServiceName.S3 }, imageTag = "1.4.0")
 public class VertxFirehoseClientSpec extends LocalStackBaseSpec {
 
     private final static String STREAM = "My-Vertx-Firehose-Stream";

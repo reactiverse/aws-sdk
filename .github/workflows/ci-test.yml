@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ 8, 11, 17 ]
+        java: [ 8, 11, 17, 19 ] # LTS versions + latest version
     name: "Run tests with JDK ${{ matrix.java }}"
     steps:
       - uses: actions/checkout@v3
@@ -22,5 +22,5 @@ jobs:
 
       - uses: gradle/gradle-build-action@v2
         with:
-          gradle-version: 7.4
+          gradle-version: current
           arguments: test -Dtests.integration=localstack
