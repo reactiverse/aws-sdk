@@ -12,6 +12,7 @@ Artifacts are published [here](https://search.maven.org/artifact/io.reactiverse/
 
 | Project | Vert.x | AWS sdk  |
 |---------|--------|----------|
+| 1.2.1   | 4.4.2  | 2.20.74  |
 | 1.2.0   | 4.4.0  | 2.20.2   |
 | 1.1.0   | 4.2.4  | 2.17.129 |
 | 1.0.0   | 4.0.0  | 2.15.45  |
