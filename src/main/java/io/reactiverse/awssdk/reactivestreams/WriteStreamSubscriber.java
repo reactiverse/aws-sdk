@@ -36,7 +36,7 @@ public class WriteStreamSubscriber<T extends WriteStream<Buffer>> implements Sub
 
     @Override
     public void onNext(ByteBuffer byteBuffer) {
-        if (byteBuffer.array().length != 0) {
+        if (byteBuffer.hasRemaining()) {
             Buffer buffer = Buffer.buffer(Unpooled.wrappedBuffer(byteBuffer));
             stream.write(buffer);
         }

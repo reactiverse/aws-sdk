@@ -1,5 +1,5 @@
 val vertxVersion = "4.4.5"
-val awsSdkVersion = "2.20.74"
+val awsSdkVersion = "2.20.138"
 val junit5Version = "5.8.2"
 val logbackVersion = "1.2.10"
 val localstackVersion = "0.2.22"
@@ -37,7 +37,7 @@ repositories {
 }
 
 fun isNonStable(version: String): Boolean {
-  val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
+  val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.uppercase().contains(it) }
   val regex = "^[0-9,.v-]+(-r)?$".toRegex()
   val isStable = stableKeyword || regex.matches(version)
   return isStable.not()
