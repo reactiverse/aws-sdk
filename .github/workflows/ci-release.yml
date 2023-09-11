@@ -24,7 +24,7 @@ jobs:
 
       - name: Get Project version
         id: get_version
-        run: echo ::set-output name=VERSION::$(gradle properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}')
+        run: echo VERSION=$(gradle properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}') >> "$GITHUB_OUTPUT"
 
       - name: Decode
         run: |
@@ -38,12 +38,11 @@ jobs:
           arguments: assemble publish -Psigning.keyId=${{secrets.SIGNING_KEY_ID}} -Psigning.password=${{secrets.SIGNING_PASSWORD}} -Psigning.secretKeyRingFile=/tmp/secring.gpg -PossrhUsername=${{secrets.SONATYPE_NEXUS_USERNAME}} -PossrhPassword=${{secrets.SONATYPE_NEXUS_PASSWORD}} --stacktrace
 
       - name: Create Release in Github
-        uses: actions/create-release@latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.get_version.outputs.VERSION }}
-          release_name: ${{ steps.get_version.outputs.VERSION }}
+          name: ${{ steps.get_version.outputs.VERSION }}
+          generate_release_notes: true
           body: |
             Available in Sonatype repository under:
             [`io.reactiverse:aws-sdk:${{ steps.get_version.outputs.VERSION }}`](https://central.sonatype.com/artifact/io.reactiverse/aws-sdk/${{ steps.get_version.outputs.VERSION }})
